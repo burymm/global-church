@@ -28,18 +28,15 @@
 
 Настройка инструментов, чтобы AI-агент мог видеть и проверять результат своего кода:
 
-- [ ] **chrome-devtools-mcp** — агент открывает браузер, делает скриншоты, проверяет console errors
+- [x] **chrome-devtools-mcp** — агент открывает браузер, делает скриншоты, проверяет console errors
   ```
   claude mcp add chrome-devtools --scope user npx chrome-devtools-mcp@latest
   ```
-- [ ] **playwright-mcp** — агент прокликивает UI, проверяет автентификацию, формы, навигацию
+- [x] **context7** — документация React/Vite/Supabase в контексте агента
   ```
-  claude mcp add playwright --scope user npx @anthropic/playwright-mcp@latest
+  claude mcp add context7 --scope user npx @upstash/context7-mcp@latest
   ```
-- [ ] **context7** — документация React/Vite/Supabase прямо в контексте агента
-  ```
-  claude mcp add context7 --scope user npx @anthropic/context7@latest
-  ```
+- [ ] **Playwright** — встроен в Claude Code, отдельный MCP не нужен. Агент может использовать встроенные инструменты для UI тестирования
 - [ ] Проверить: агент пишет компонент → открывает браузер → видит как выглядит → исправляет
 
 **Зачем:** Убирает цикл "написать → показать → ждать фидбек → исправить". Агент сам себя проверяет.

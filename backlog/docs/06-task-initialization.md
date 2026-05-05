@@ -10,8 +10,8 @@
 
 - [X] Создать аккаунт на [supabase.com](https://supabase.com) (бесплатный план)
 - [X] Создать новый проект
-- [ ] Скопировать Project URL и anon key
-- [ ] Записать в `.env`:
+- [X] Скопировать Project URL и anon key
+- [X] Записать в `.env`:
   ```
   VITE_SUPABASE_URL=https://xxx.supabase.co
   VITE_SUPABASE_ANON_KEY=xxx
@@ -19,8 +19,8 @@
 
 ### 2. База данных
 
-- [ ] Открыть SQL Editor в Supabase Dashboard
-- [ ] Выполнить SQL из `supabase/schema.sql`:
+- [X] Открыть SQL Editor в Supabase Dashboard
+- [X] Выполнить SQL из `supabase/schema.sql`:
   - Таблица `users` (профили)
   - Таблица `user_locations` (история геолокации)
   - Таблица `messages` (личные сообщения)
@@ -28,22 +28,22 @@
   - Row Level Security правила
   - Триггер авто-создания профиля при регистрации
   - Supabase Realtime публикация
-- [ ] Проверить в Table Editor что таблицы созданы: `users`, `user_locations`, `messages`
+- [X] Проверить в Table Editor что таблицы созданы: `users`, `user_locations`, `messages`
 
 ### 3. Google OAuth
 
-- [ ] Supabase Dashboard → Authentication → Providers → Google
-- [ ] Включить Google Provider
-- [ ] Создать Google Cloud Console проект ([console.cloud.google.com](https://console.cloud.google.com))
-- [ ] Настроить OAuth consent screen (тип: External)
-- [ ] Создать OAuth 2.0 Client ID (Web application)
-- [ ] Добавить Authorized redirect URIs:
+- [X] Supabase Dashboard → Authentication → Providers → Google
+- [X] Включить Google Provider
+- [X] Создать Google Cloud Console проект ([console.cloud.google.com](https://console.cloud.google.com))
+- [X] Настроить OAuth consent screen (тип: External)
+- [X] Создать OAuth 2.0 Client ID (Web application)
+- [X] Добавить Authorized redirect URIs:
   ```
   https://<PROJECT_REF>.supabase.co/auth/v1/authorize/google/callback
   http://localhost:5173/auth/callback
   ```
-- [ ] Вставить Client ID и Client Secret в Supabase
-- [ ] В Supabase Settings → URL Configuration → добавить Site URL и Redirect URLs:
+- [X] Вставить Client ID и Client Secret в Supabase
+- [X] В Supabase Settings → URL Configuration → добавить Site URL и Redirect URLs:
   ```
   Site URL: http://localhost:5173
   Redirect URLs: http://localhost:5173/auth/callback
@@ -51,33 +51,30 @@
 
 ### 4. Dev Tools для AI-агентов (MCP)
 
-- [ ] Установить chrome-devtools-mcp:
+- [x] Установить chrome-devtools-mcp (уже установлен):
   ```
   claude mcp add chrome-devtools --scope user npx chrome-devtools-mcp@latest
   ```
-- [ ] Установить playwright-mcp:
+- [x] Установить context7 для документации (React/Vite/Supabase):
   ```
-  claude mcp add playwright --scope user npx @anthropic/playwright-mcp@latest
+  claude mcp add context7 --scope user npx @upstash/context7-mcp@latest
   ```
-- [ ] Установить context7:
-  ```
-  claude mcp add context7 --scope user npx @anthropic/context7@latest
-  ```
-- [ ] Проверить: `claude mcp list` — все три MCP-сервера должны быть в списке
+- [X] Проверить: `claude mcp list` — оба MCP-сервера должны быть ✓ Connected
+- [X] **Примечание:** Playwright встроен в Claude Code — отдельный MCP не нужен
 
 ### 5. Локальный запуск
 
-- [ ] Убедиться что Node.js 20+ установлен
-- [ ] `npm install`
-- [ ] Создать `.env` из `.env.example`
-- [ ] `npm run dev`
-- [ ] Открыть http://localhost:5173
-- [ ] Проверить что отображается страница авторизации
+- [x] Убедиться что Node.js 20+ установлен
+- [x] `npm install`
+- [x] Создать `.env` из `.env.example`
+- [x] `npm run dev`
+- [x] Открыть http://localhost:5173
+- [x] Проверить что отображается страница авторизации
 
 ### 6. Проверка авторизации
 
-- [ ] Нажать "Sign in with Google"
-- [ ] Авторизоваться через Google аккаунт
+- [x] Нажать "Sign in with Google"
+- [x] Авторизоваться через Google аккаунт
 - [ ] Проверить что редирект на карту
 - [ ] Проверить что профиль создан в Table Editor → `users`
 

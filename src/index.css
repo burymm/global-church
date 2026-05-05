@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+#root { height: 100%; display: flex; flex-direction: column; }
+.leaflet-container { width: 100%; height: 100%; }
+@supports (padding: max(0px)) {
+  .safe-bottom { padding-bottom: max(0px, env(safe-area-inset-bottom)); }
+}
