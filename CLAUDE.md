@@ -1,0 +1,51 @@
+да# Global Church — AI Agent Instructions
+
+## Project
+Mobile PWA app for Christians to connect. React + TypeScript + Vite + Tailwind + Leaflet + Supabase.
+
+## Git — NEVER commit autonomously
+**Never commit or push unless the user explicitly says "commit" or "push".** Only show the diff and wait for instructions.
+
+## Tech Stack
+- **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, Zustand, React Router v7
+- **Maps:** Leaflet + OpenStreetMap (not Google Maps)
+- **Backend:** Supabase (Auth + PostgreSQL + Realtime) — no Node.js server needed
+- **i18n:** i18next (ru default, be, en)
+- **PWA:** vite-plugin-pwa
+
+## Architecture
+- All external APIs abstracted via interfaces in `src/services/`
+- Providers in `src/providers/` (currently Supabase + Leaflet + Browser Geolocation)
+- Store files in `src/store/` (Zustand)
+- Pages in `src/pages/`
+- Components in `src/components/`
+
+## Supabase
+- Database schema: `supabase/schema.sql`
+- Auth via Google OAuth
+- Realtime subscriptions on `messages` and `user_locations` tables
+- RLS enabled on all tables
+
+## Code Style
+- TypeScript with strict mode
+- No comments explaining WHAT (code is self-documenting)
+- Only add comments for WHY (non-obvious decisions, constraints)
+- No error handling for scenarios the framework covers
+- File names: camelCase (`authStore.ts`, `mapPage.tsx`)
+- Components: PascalCase
+
+## Branches
+- `master` — main branch (production-ready)
+- `dev` — development branch
+- `feature/*` — optional for large changes
+
+## Dev
+```bash
+npm run dev      # Start dev server (http://localhost:5173)
+npm run build    # Build for production
+npm run preview  # Preview production build
+```
+
+## MCP Tools
+- chrome-devtools — agent can see the app in browser
+- context7 — documentation lookup
