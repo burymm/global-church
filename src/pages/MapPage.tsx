@@ -14,10 +14,10 @@ L.Icon.Default.mergeOptions({
 
 const defaultCenter: [number, number] = [53.9, 27.56]
 
-function userIcon(isMe: boolean) {
+function userIcon(emoji: string, isMe: boolean) {
   return L.divIcon({
     className: '',
-    html: `<div style="background:${isMe ? '#10b981' : '#3b82f6'};width:28px;height:28px;border-radius:50%;border:3px solid ${isMe ? '#059669' : 'white'};box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-size:14px;color:white;">✝</div>`,
+    html: `<div style="background:${isMe ? '#10b981' : '#3b82f6'};width:28px;height:28px;border-radius:50%;border:3px solid ${isMe ? '#059669' : 'white'};box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-size:14px;color:white;">${emoji}</div>`,
     iconSize: [28, 28], iconAnchor: [14, 14],
   })
 }
@@ -126,7 +126,7 @@ export function MapPage() {
   const myId = currentUser?.id
 
   return (
-    <div className="relative h-full">
+    <div className="relative h-full pb-16">
       <MapContainer center={defaultCenter} zoom={12} zoomControl={false} style={{ width: '100%', height: '100%' }}>
         <TileLayer attribution="" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
         <LocateControl />
@@ -136,7 +136,7 @@ export function MapPage() {
             key={loc.user_id}
             ref={(el) => handleMarkerRef(loc.user_id, el as any)}
             position={[loc.lat, loc.lng]}
-            icon={userIcon(loc.user_id === myId)}
+            icon={userIcon(loc.display_icon || '✝', loc.user_id === myId)}
             eventHandlers={{ click: () => setActiveUser(loc.user_id) }}
           >
             <Popup>

@@ -8,6 +8,7 @@ CREATE TABLE users (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   display_name TEXT NOT NULL,
+  display_icon TEXT,
   avatar_url TEXT,
   denomination TEXT DEFAULT 'orthodox',
   faith_type TEXT DEFAULT 'christian' CHECK (faith_type IN ('christian', 'other')),

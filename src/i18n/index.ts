@@ -4,7 +4,7 @@ import { initReactI18next } from 'react-i18next';
 const resources = {
   ru: {
     translation: {
-      nav: { map: 'Карта', chat: 'Чат', profile: 'Профиль' },
+      nav: { map: 'Карта', chat: 'Чат', profile: 'Профиль', settings: 'Меню', userSettings: 'Пользователь', back: 'Назад' },
       auth: { signIn: 'Войти', google: 'Войти через Google', welcome: 'Добро пожаловать в Global Church', description: 'Найди христиан для молитвы, общения и домашней группы', terms: 'Продолжая, вы соглашаетесь с условиями использования' },
       callback: { authorizing: 'Авторизация...', profileError: 'Ошибка создания профиля', timeout: 'Время ожидания истекло' },
       map: { title: 'Карта', shareLocation: '📍 Поделиться местоположением', stopSharing: '🔴 Остановить передачу', readyTo: 'Готов', locationDenied: 'Геолокация заблокирована', locationDeniedHint: 'Разрешите в настройках браузера или Настройки телефона → Конфиденциальность', permissionPrompt: 'Разрешите доступ к местоположению для отображения на карте' },
@@ -17,6 +17,7 @@ const resources = {
         statusesList: { readyToPray: 'Готов помолиться', readyToChat: 'Готов пообщаться', lookingHomeGroup: 'Ищу домашнюю группу', lookingFriends: 'Ищу друзей-христиан', openToTalk: 'Открыт для разговора' },
       },
       common: { loading: 'Загрузка...' },
+      settings: { icon: 'Иконка', openFor: 'Открыт для' },
     },
   },
   be: {
@@ -34,6 +35,7 @@ const resources = {
         statusesList: { readyToPray: 'Гатовы памаліцца', readyToChat: 'Гатовы пагутарыць', lookingHomeGroup: 'Шукаю хатнюю групу', lookingFriends: 'Шукаю сяброў-хрысціян', openToTalk: 'Адкрыты для размовы' },
       },
       common: { loading: 'Загрузка...' },
+      settings: { icon: 'Іконка', openFor: 'Адкрыты для' },
     },
   },
   en: {
@@ -51,6 +53,7 @@ const resources = {
         statusesList: { readyToPray: 'Ready to Pray', readyToChat: 'Ready to Chat', lookingHomeGroup: 'Looking for a Home Group', lookingFriends: 'Looking for Christian Friends', openToTalk: 'Open to Talk' },
       },
       common: { loading: 'Loading...' },
+      settings: { icon: 'Icon', openFor: 'Open to' },
     },
   },
 };

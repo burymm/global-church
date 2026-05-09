@@ -5,6 +5,7 @@ import { useAuthStore } from './store/authStore';
 import { MapPage } from './pages/MapPage';
 import { ChatPage } from './pages/ChatPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { SettingsPage } from './pages/SettingsPage';
 import { AuthPage } from './pages/AuthPage';
 import { AuthCallbackPage } from './pages/AuthCallbackPage';
 import { BottomNav } from './components/ui/BottomNav';
@@ -32,6 +33,7 @@ export default function App() {
                 <Route path="/map" element={<MapPage />} />
                 <Route path="/chat" element={<ChatPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/settings" element={<SettingsPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </>
             ) : (

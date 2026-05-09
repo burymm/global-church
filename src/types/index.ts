@@ -3,6 +3,7 @@ export interface User {
   created_at: string;
   updated_at: string;
   display_name: string;
+  display_icon: string | null;
   avatar_url: string | null;
   denomination: string | null;
   faith_type: 'christian' | 'other';
@@ -36,6 +37,7 @@ export interface UserLocation {
   updated_at: string;
   is_sharing: boolean;
   display_name: string;
+  display_icon: string | null;
   avatar_url: string | null;
   denomination: string | null;
   statuses: string[];
