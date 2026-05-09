@@ -48,6 +48,7 @@
   Site URL: http://localhost:5173
   Redirect URLs: http://localhost:5173/auth/callback
   ```
+- [ ] Для тестирования на мобильных: добавить `http://<локальный-IP>:5173/auth/callback` в Redirect URLs
 
 ### 4. Dev Tools для AI-агентов (MCP)
 

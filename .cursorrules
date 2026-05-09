@@ -28,6 +28,7 @@ Mobile PWA app for Christians to connect. React + TypeScript + Vite + Tailwind +
 
 ## Code Style
 - TypeScript with strict mode
+- **Always use semicolons** at the end of statements, variable declarations, arrow function expressions, interface/property declarations, and import/export statements
 - No comments explaining WHAT (code is self-documenting)
 - Only add comments for WHY (non-obvious decisions, constraints)
 - No error handling for scenarios the framework covers

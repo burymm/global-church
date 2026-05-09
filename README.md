@@ -49,17 +49,11 @@ Open http://localhost:5173
 
 ## Documentation
 
-Project documentation is in `backlog/docs/`:
+Project documentation and task tracking:
 
-| File | Description |
-|------|-------------|
-| `01-project-overview.md` | Project description, goals, features |
-| `02-technology-stack.md` | Technology choices and alternatives |
-| `03-architecture.md` | Project structure, routing, data flow |
-| `04-roadmap.md` | Development roadmap (5 phases) |
-| `05-architecture-decisions.md` | Abstract service layers for future migration |
-| `06-task-initialization.md` | Setup checklist |
-| `07-dev-guidelines.md` | Git, naming, commit conventions |
+- [backlog/TASKS.md](backlog/TASKS.md) — all tasks, in progress and planned
+- [backlog/docs/01-project-overview.md](backlog/docs/01-project-overview.md) — project description, goals
+- [backlog/docs/04-roadmap.md](backlog/docs/04-roadmap.md) — 5-phase roadmap
 
 ---
 
@@ -114,14 +108,8 @@ npm run dev
 
 ## Документация
 
-Документация проекта в `backlog/docs/`:
+Документация и трекинг задач:
 
-| Файл | Описание |
-|------|----------|
-| `01-project-overview.md` | Описание проекта, цели, функциональность |
-| `02-technology-stack.md` | Выбор технологий и альтернативы |
-| `03-architecture.md` | Структура, роутинг, потоки данных |
-| `04-roadmap.md` | Дорожная карта разработки (5 фаз) |
-| `05-architecture-decisions.md` | Абстрактные слои для миграции |
-| `06-task-initialization.md` | Чек-лист настройки проекта |
-| `07-dev-guidelines.md` | Правила: git, именование, коммиты |
+- [backlog/TASKS.md](backlog/TASKS.md) — все задачи, в работе и запланированные
+- [backlog/docs/01-project-overview.md](backlog/docs/01-project-overview.md) — описание проекта, цели
+- [backlog/docs/04-roadmap.md](backlog/docs/04-roadmap.md) — дорожная карта (5 фаз)
