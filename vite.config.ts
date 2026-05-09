@@ -1,6 +1,14 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { VitePWA } from 'vite-plugin-pwa'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
+import fs from 'fs';
+import path from 'path';
+
+const certPath = path.resolve(__dirname, 'cert');
+const httpsOptions = fs.existsSync(certPath) ? {
+  key: fs.readFileSync(path.join(certPath, 'key.pem')),
+  cert: fs.readFileSync(path.join(certPath, 'cert.pem')),
+} : undefined;
 
 export default defineConfig({
   plugins: [
@@ -24,4 +32,7 @@ export default defineConfig({
       },
     }),
   ],
-})
+  server: {
+    https: httpsOptions,
+  },
+});

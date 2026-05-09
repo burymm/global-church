@@ -91,7 +91,7 @@ BEGIN
   INSERT INTO users (id, display_name, avatar_url)
   VALUES (
     NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'display_name', NEW.email),
+    COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email),
     NEW.raw_user_meta_data->>'avatar_url'
   );
   RETURN NEW;
@@ -117,6 +117,10 @@ CREATE POLICY "Users can view all profiles"
 CREATE POLICY "Users can update own profile"
   ON users FOR UPDATE
   USING (auth.uid() = id);
+
+CREATE POLICY "Users can insert own profile"
+  ON users FOR INSERT
+  WITH CHECK (auth.uid() = id);
 
 -- Messages: users can only read/write their own messages
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;

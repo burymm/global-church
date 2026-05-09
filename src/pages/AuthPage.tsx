@@ -1,9 +1,9 @@
-import { useTranslation } from 'react-i18next'
-import { useAuthStore } from '../store/authStore'
+import { useTranslation } from 'react-i18next';
+import { useAuthStore } from '../store/authStore';
 
 export function AuthPage() {
-  const { t } = useTranslation()
-  const { signInWithGoogle } = useAuthStore()
+  const { t } = useTranslation();
+  const { signInWithGoogle } = useAuthStore();
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white px-6">
@@ -24,7 +24,7 @@ export function AuthPage() {
         </svg>
         {t('auth.google')}
       </button>
-      <p className="text-xs text-gray-400 mt-8 text-center">Продолжая, вы соглашаетесь с условиями использования</p>
+      <p className="text-xs text-gray-400 mt-8 text-center">{t('auth.terms')}</p>
     </div>
-  )
+  );
 }

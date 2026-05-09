@@ -1,46 +1,68 @@
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { supabase } from '../lib/supabase';
 
 export function AuthCallbackPage() {
-  const navigate = useNavigate()
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [status, setStatus] = useState(t('callback.authorizing'));
 
   useEffect(() => {
-    const url = new URL(window.location.href)
-    const hasOAuth = url.hash || url.searchParams.get('code') || url.searchParams.get('error')
+    let handled = false;
 
-    if (!hasOAuth) {
-      navigate('/', { replace: true })
-      return
-    }
+    const upsertUser = async (session: any) => {
+      if (handled) return;
+      handled = true;
+
+      const userId = session.user.id;
+      const displayName = session.user.user_metadata?.full_name || session.user.email || 'User';
+      const avatarUrl = session.user.user_metadata?.avatar_url || null;
+
+      const { error: upsertError } = await supabase
+        .from('users')
+        .upsert({
+          id: userId,
+          display_name: displayName,
+          avatar_url: avatarUrl,
+        }, { onConflict: 'id' });
+
+      if (upsertError) {
+        setStatus(t('callback.profileError'));
+        setTimeout(() => navigate('/auth', { replace: true }), 3000);
+        return;
+      }
+
+      navigate('/', { replace: true });
+    };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
-        const { data: existing } = await supabase.from('users').select('id').eq('id', session.user.id).maybeSingle()
-
-        if (!existing) {
-          await supabase.from('users').insert({
-            id: session.user.id,
-            display_name: session.user.user_metadata?.full_name || session.user.email || 'User',
-            avatar_url: session.user.user_metadata?.avatar_url || null,
-          }).select('*').single()
-        }
-
-        navigate('/', { replace: true })
+        await upsertUser(session);
       }
-    })
+    });
 
-    const timeout = setTimeout(() => navigate('/auth', { replace: true }), 15000)
+    const timeout = setTimeout(async () => {
+      if (handled) return;
+      subscription.unsubscribe();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await upsertUser(session);
+      } else {
+        setStatus(t('callback.timeout'));
+        setTimeout(() => navigate('/auth', { replace: true }), 3000);
+      }
+    }, 15000);
 
     return () => {
-      subscription.unsubscribe()
-      clearTimeout(timeout)
-    }
-  }, [navigate])
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
+  }, [navigate, t]);
 
   return (
     <div className="flex items-center justify-center h-full bg-gray-50">
-      <p className="text-gray-500">Авторизация...</p>
+      <p className="text-gray-500">{status}</p>
     </div>
-  )
+  );
 }

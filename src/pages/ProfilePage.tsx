@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useAuthStore } from '../store/authStore'
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useAuthStore } from '../store/authStore';
 
 const denominations = [
   { value: 'orthodox', labelKey: 'profile.denominations.orthodox' },
@@ -9,7 +9,7 @@ const denominations = [
   { value: 'pentecostal', labelKey: 'profile.denominations.pentecostal' },
   { value: 'charismatic', labelKey: 'profile.denominations.charismatic' },
   { value: 'other', labelKey: 'profile.denominations.other' },
-]
+];
 
 const interests = [
   { value: 'prayer', labelKey: 'profile.interestsList.prayer' },
@@ -18,7 +18,7 @@ const interests = [
   { value: 'churchService', labelKey: 'profile.interestsList.churchService' },
   { value: 'fellowship', labelKey: 'profile.interestsList.fellowship' },
   { value: 'mentoring', labelKey: 'profile.interestsList.mentoring' },
-]
+];
 
 const statuses = [
   { value: 'readyToPray', labelKey: 'profile.statusesList.readyToPray' },
@@ -26,31 +26,31 @@ const statuses = [
   { value: 'lookingHomeGroup', labelKey: 'profile.statusesList.lookingHomeGroup' },
   { value: 'lookingFriends', labelKey: 'profile.statusesList.lookingFriends' },
   { value: 'openToTalk', labelKey: 'profile.statusesList.openToTalk' },
-]
+];
 
 const languages = [
-  { value: 'ru' as const, label: 'Русский' },
-  { value: 'be' as const, label: 'Беларуская' },
-  { value: 'en' as const, label: 'English' },
-]
+  { value: 'ru' as const, labelKey: 'profile.languages.ru' },
+  { value: 'be' as const, labelKey: 'profile.languages.be' },
+  { value: 'en' as const, labelKey: 'profile.languages.en' },
+];
 
 export function ProfilePage() {
-  const { t, i18n } = useTranslation()
-  const { user, signOut, updateUser } = useAuthStore()
-  const [displayName, setDisplayName] = useState(user?.display_name || '')
-  const [denomination, setDenomination] = useState(user?.denomination || 'orthodox')
-  const [selectedInterests, setSelectedInterests] = useState<string[]>(user?.interests || [])
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(user?.statuses || [])
-  const [language, setLanguage] = useState(user?.language || 'ru')
+  const { t, i18n } = useTranslation();
+  const { user, signOut, updateUser } = useAuthStore();
+  const [displayName, setDisplayName] = useState(user?.display_name || '');
+  const [denomination, setDenomination] = useState(user?.denomination || 'orthodox');
+  const [selectedInterests, setSelectedInterests] = useState<string[]>(user?.interests || []);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(user?.statuses || []);
+  const [language, setLanguage] = useState(user?.language || 'ru');
 
   const toggle = (list: string[], value: string, setter: (v: string[]) => void) => {
-    setter(list.includes(value) ? list.filter((v) => v !== value) : [...list, value])
-  }
+    setter(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
+  };
 
   const handleSave = () => {
-    updateUser({ display_name: displayName, denomination, interests: selectedInterests, statuses: selectedStatuses, language })
-    i18n.changeLanguage(language)
-  }
+    updateUser({ display_name: displayName, denomination, interests: selectedInterests, statuses: selectedStatuses, language });
+    i18n.changeLanguage(language);
+  };
 
   return (
     <div className="h-full overflow-y-auto pb-24">
@@ -71,7 +71,7 @@ export function ProfilePage() {
             <div className="flex gap-2">
               {languages.map((lang) => (
                 <button key={lang.value} onClick={() => setLanguage(lang.value)}
-                  className={`px-3 py-1.5 rounded-lg text-sm ${language === lang.value ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>{lang.label}</button>
+                  className={`px-3 py-1.5 rounded-lg text-sm ${language === lang.value ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>{t(lang.labelKey)}</button>
               ))}
             </div>
           </div>
@@ -102,10 +102,10 @@ export function ProfilePage() {
               ))}
             </div>
           </div>
-          <button onClick={handleSave} className="w-full bg-blue-600 text-white rounded-lg py-2.5 text-sm font-medium">Сохранить</button>
+          <button onClick={handleSave} className="w-full bg-blue-600 text-white rounded-lg py-2.5 text-sm font-medium">{t('profile.save')}</button>
         </div>
         <button onClick={signOut} className="w-full bg-gray-100 text-red-600 rounded-xl p-4 text-sm font-medium hover:bg-gray-200">{t('profile.signOut')}</button>
       </div>
     </div>
-  )
+  );
 }
