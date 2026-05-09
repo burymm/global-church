@@ -1,5 +1,4 @@
 import { useEffect, useCallback, useRef } from 'react'
-import { useTranslation } from 'react-i18next'
 import i18n from '../i18n'
 import { useLocationStore } from '../store/locationStore'
 import { useAuthStore } from '../store/authStore'
@@ -57,8 +56,8 @@ function LocateControl() {
     const ctrl = new Ctrl()
     map.addControl(ctrl)
 
-    const unsubscribe = i18n.on('languageChanged', updateText)
-    return () => { map.removeControl(ctrl); btnRef.current = null; unsubscribe(); }
+    i18n.on('languageChanged', updateText)
+    return () => { map.removeControl(ctrl); btnRef.current = null; }
   }, [map, isSharing, handleLocate])
   return null
 }

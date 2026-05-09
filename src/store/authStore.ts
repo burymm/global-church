@@ -9,9 +9,10 @@ interface AuthState {
   init: () => () => void;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  updateUser: (updates: Partial<User>) => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   user: null,
   isLoading: true,
@@ -63,5 +64,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   signOut: async () => {
     await supabase.auth.signOut();
     set({ session: null, user: null });
+  },
+
+  updateUser: async (updates: Partial<User>) => {
+    if (!get().session) return;
+    await supabase.from('users').update(updates).eq('id', get().session.user.id);
+    set({ user: get().user ? ({ ...get().user, ...updates } as User) : null });
   },
 }));
