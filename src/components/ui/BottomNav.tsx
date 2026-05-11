@@ -38,7 +38,7 @@ export function BottomNav() {
             </button>
             {showMenu && (
               <div className="absolute bottom-16 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-50">
-                <button onClick={() => { setShowMenu(false); navigate('/settings'); }}
+                <button onClick={() => { setShowMenu(false); navigate('/profile'); }}
                   className="w-full px-4 py-3 text-left text-sm hover:bg-gray-50 border-b border-gray-100">
                   {t('nav.userSettings')}
                 </button>

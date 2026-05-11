@@ -7,6 +7,7 @@ interface LocationState {
   isSharing: boolean;
   watchId: number | null;
   isOnlineInterval: ReturnType<typeof setInterval> | null;
+  _isUpdating: boolean;
   fetchOnlineLocations: () => Promise<void>;
   startSharing: () => void;
   stopSharing: () => void;
@@ -20,6 +21,7 @@ export const useLocationStore = create<LocationState>((set, get) => ({
   isSharing: false,
   watchId: null,
   isOnlineInterval: null,
+  _isUpdating: false,
 
   fetchOnlineLocations: async () => {
     const { data: me } = await supabase
@@ -83,20 +85,22 @@ export const useLocationStore = create<LocationState>((set, get) => ({
 
     const watchId = navigator.geolocation.watchPosition(
       async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
-        await supabase.from('user_locations').upsert({
-          user_id: session.user.id, lat, lng,
-          accuracy: pos.coords.accuracy, is_sharing: true,
-        }, { onConflict: 'user_id' });
-        await supabase.from('users').update({
-          location_lat: lat, location_lng: lng,
-          location_updated_at: new Date().toISOString(),
-          is_sharing_location: true, is_online: true,
-        }).eq('id', session.user.id);
-        get().fetchOnlineLocations();
+        if (get()._isUpdating) return;
+        set({ _isUpdating: true });
+        try {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) return;
+          await supabase.from('users').update({
+            location_lat: lat, location_lng: lng,
+            location_updated_at: new Date().toISOString(),
+            is_sharing_location: true, is_online: true,
+          }).eq('id', session.user.id);
+          get().fetchOnlineLocations();
+        } finally {
+          set({ _isUpdating: false });
+        }
       },
       () => {},
       { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 },
@@ -111,7 +115,6 @@ export const useLocationStore = create<LocationState>((set, get) => ({
     if (session) {
       await supabase.from('users').update({ is_sharing_location: false })
         .eq('id', session.user.id);
-      await supabase.from('user_locations').delete().eq('user_id', session.user.id);
     }
     set({ isSharing: false, watchId: null });
     get().fetchOnlineLocations();

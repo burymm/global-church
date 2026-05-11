@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
 import { statusIcons } from '../i18n';
 
+const emojis = ['✝', '⛪', '🙏', '📖', '🔥', '💧', '🕊', '🌟', '⚓', '🎯', '💡', '🌿', '☀️', '❤️', '🤝', '👨', '👨‍🦳', '🧔', '👳', '🙎'];
+
 const denominations = [
   { value: 'orthodox', labelKey: 'profile.denominations.orthodox' },
   { value: 'catholic', labelKey: 'profile.denominations.catholic' },
@@ -38,6 +40,7 @@ export function ProfilePage() {
   const { t, i18n } = useTranslation();
   const { user, signOut, updateUser } = useAuthStore();
   const [displayName, setDisplayName] = useState(user?.display_name || '');
+  const [selectedEmoji, setSelectedEmoji] = useState(user?.display_icon || '✝');
   const [denomination, setDenomination] = useState(user?.denomination || 'orthodox');
   const [selectedInterests, setSelectedInterests] = useState<string[]>(user?.interests || []);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>(user?.statuses || []);
@@ -48,7 +51,7 @@ export function ProfilePage() {
   };
 
   const handleSave = () => {
-    updateUser({ display_name: displayName, denomination, interests: selectedInterests, statuses: selectedStatuses, language });
+    updateUser({ display_name: displayName, display_icon: selectedEmoji, denomination, interests: selectedInterests, statuses: selectedStatuses, language });
     i18n.changeLanguage(language);
   };
 
@@ -62,6 +65,17 @@ export function ProfilePage() {
       </div>
       <div className="px-4 -mt-4 space-y-4">
         <div className="bg-white rounded-xl shadow p-4 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('profile.icon')}</label>
+            <div className="flex flex-wrap gap-2">
+              {emojis.map((emoji) => (
+                <button key={emoji} onClick={() => setSelectedEmoji(emoji)}
+                  className={`w-10 h-10 text-xl rounded-lg border-2 flex items-center justify-center ${selectedEmoji === emoji ? 'border-blue-600 bg-blue-50' : 'border-gray-200'}`}>
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t('profile.displayName')}</label>
             <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
