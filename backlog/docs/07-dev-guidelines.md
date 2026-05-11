@@ -5,23 +5,24 @@
 ### Формат
 
 ```
-[<номер задачи>] — <краткое описание>
+[task-<номер>] - <краткое описание>   # задачи/фичи
+[bug-<номер>] - <краткое описание>     # баги
 ```
 
 **Примеры:**
 
 ```
-[01] - create project structure
-[02] - add auth store and auth page
-[03] - implement map page with leaflet
-[04] - add chat functionality with realtime
-[05] - implement profile page
-[06] - setup dev tools and MCP servers
+[task-01] - create project structure
+[task-02] - add auth store and auth page
+[bug-01] - fix language resets to russian
+[bug-02] - fix location sharing state lost on reload
 ```
 
 ### Правила
 
-- Номер задачи = номер файла в `backlog/docs/` (например, `06-task-initialization.md` → `[06]`)
+- Номер задачи совпадает с номером файла в `backlog/docs/` или `backlog/bugs/`
+- Для багов: `bug-01`, `bug-02` и т.д. (из `backlog/bugs/`)
+- Для задач: `task-01`, `task-02` и т.д. (из `backlog/docs/`)
 - После тире — краткое описание на английском (что было сделано)
 - Один коммит = одно логическое изменение
 - Не коммить `node_modules`, `.env`, `dist`

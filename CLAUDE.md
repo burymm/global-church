@@ -9,6 +9,19 @@ Mobile PWA app for Christians to connect. React + TypeScript + Vite + Tailwind +
 - Do NOT assume that finishing a task means you can commit — always ask first.
 - This rule applies to all git operations: commit, push, deploy, merge, PR creation.
 
+## Commit Format
+
+Commits follow a numbered format:
+
+- Bugs: `[bug-<number>] - <description>`
+- Tasks/features: `[task-<number>] - <description>`
+
+Examples:
+```
+[bug-01] - fix language resets to russian
+[task-11] - added user profile settings, fixed some errors
+```
+
 ## Tech Stack
 - **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, Zustand, React Router v7
 - **Maps:** Leaflet + OpenStreetMap (not Google Maps)

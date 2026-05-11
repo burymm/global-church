@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
+import i18n from '../i18n';
 import type { User } from '../types';
 
 interface AuthState {
@@ -39,7 +40,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
               },
             });
             const body = await resp.json();
-            set({ session, user: body?.[0] as User, isLoading: false });
+            const user = body?.[0] as User | undefined;
+            if (user?.language) i18n.changeLanguage(user.language);
+            set({ session, user, isLoading: false });
           } catch {
             set({ session: null, user: null, isLoading: false });
           }
