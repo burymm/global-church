@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
+import { statusIcons } from '../i18n';
 
 const emojis = ['✝', '⛪', '🙏', '📖', '🔥', '💧', '🕊', '🌟', '⚓', '🎯', '💡', '🌿', '☀️', '❤️', '🤝', '👨', '👨‍🦳', '🧔', '👳', '🙎'];
 
@@ -19,7 +20,6 @@ const statuses = [
   { value: 'readyToChat', labelKey: 'profile.statusesList.readyToChat' },
   { value: 'lookingHomeGroup', labelKey: 'profile.statusesList.lookingHomeGroup' },
   { value: 'lookingFriends', labelKey: 'profile.statusesList.lookingFriends' },
-  { value: 'openToTalk', labelKey: 'profile.statusesList.openToTalk' },
 ];
 
 export function SettingsPage() {
@@ -74,7 +74,7 @@ export function SettingsPage() {
               {statuses.map((item) => (
                 <button key={item.value} onClick={() => toggle(selectedStatuses, item.value)}
                   className={`px-3 py-1.5 rounded-lg text-sm ${selectedStatuses.includes(item.value) ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700'}`}>
-                  {t(item.labelKey)}
+                  {statusIcons[item.value]} {t(item.labelKey)}
                 </button>
               ))}
             </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
+import { statusIcons } from '../i18n';
 
 const denominations = [
   { value: 'orthodox', labelKey: 'profile.denominations.orthodox' },
@@ -25,7 +26,6 @@ const statuses = [
   { value: 'readyToChat', labelKey: 'profile.statusesList.readyToChat' },
   { value: 'lookingHomeGroup', labelKey: 'profile.statusesList.lookingHomeGroup' },
   { value: 'lookingFriends', labelKey: 'profile.statusesList.lookingFriends' },
-  { value: 'openToTalk', labelKey: 'profile.statusesList.openToTalk' },
 ];
 
 const languages = [
@@ -98,7 +98,7 @@ export function ProfilePage() {
             <div className="flex flex-wrap gap-2">
               {statuses.map((item) => (
                 <button key={item.value} onClick={() => toggle(selectedStatuses, item.value, setSelectedStatuses)}
-                  className={`px-3 py-1.5 rounded-lg text-sm ${selectedStatuses.includes(item.value) ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700'}`}>{t(item.labelKey)}</button>
+                  className={`px-3 py-1.5 rounded-lg text-sm ${selectedStatuses.includes(item.value) ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700'}`}>{statusIcons[item.value]} {t(item.labelKey)}</button>
               ))}
             </div>
           </div>

@@ -90,7 +90,7 @@ export const useLocationStore = create<LocationState>((set, get) => ({
         await supabase.from('user_locations').upsert({
           user_id: session.user.id, lat, lng,
           accuracy: pos.coords.accuracy, is_sharing: true,
-        });
+        }, { onConflict: 'user_id' });
         await supabase.from('users').update({
           location_lat: lat, location_lng: lng,
           location_updated_at: new Date().toISOString(),
@@ -111,6 +111,7 @@ export const useLocationStore = create<LocationState>((set, get) => ({
     if (session) {
       await supabase.from('users').update({ is_sharing_location: false })
         .eq('id', session.user.id);
+      await supabase.from('user_locations').delete().eq('user_id', session.user.id);
     }
     set({ isSharing: false, watchId: null });
     get().fetchOnlineLocations();

@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react'
-import i18n from '../i18n'
+import i18n, { statusIcons } from '../i18n'
 import { useLocationStore } from '../store/locationStore'
 import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
@@ -76,10 +76,12 @@ function PopupContent({ loc }: { loc: any }) {
       )}
       <p className="font-medium text-sm">{loc.display_name}</p>
       {loc.denomination && (
-        <p className="text-xs text-gray-500">{loc.denomination}</p>
+        <p className="text-xs text-gray-500">{i18n.t(`profile.denominations.${loc.denomination}`)}</p>
       )}
       {loc.statuses?.length > 0 && (
-        <p className="text-xs text-blue-600 mt-0.5">{loc.statuses.join(' · ')}</p>
+        <p className="text-xs text-blue-600 mt-0.5">
+          {loc.statuses.map((s: string) => `${statusIcons[s] || ''} ${i18n.t(`profile.statusesList.${s}`)}`).join(' · ')}
+        </p>
       )}
     </div>
   )

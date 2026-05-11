@@ -14,7 +14,7 @@ const resources = {
         languages: { ru: 'Русский', be: 'Беларуская', en: 'English' },
         denominations: { orthodox: 'Православный', catholic: 'Католик', baptist: 'Баптист', pentecostal: 'Пятидесятник', charismatic: 'Харизмат', other: 'Другой' },
         interestsList: { prayer: 'Помолиться', bibleStudy: 'Изучить Библию', homeGroup: 'Найти домашнюю группу', churchService: 'Посетить службу', fellowship: 'Общение', mentoring: 'Наставничество' },
-        statusesList: { readyToPray: 'Готов помолиться', readyToChat: 'Готов пообщаться', lookingHomeGroup: 'Ищу домашнюю группу', lookingFriends: 'Ищу друзей-христиан', openToTalk: 'Открыт для разговора' },
+        statusesList: { readyToPray: 'Готов помолиться', readyToChat: 'Готов пообщаться', lookingHomeGroup: 'Ищу домашнюю группу', lookingFriends: 'Ищу друзей-христиан' },
       },
       common: { loading: 'Загрузка...' },
       settings: { icon: 'Иконка', openFor: 'Открыт для' },
@@ -32,7 +32,7 @@ const resources = {
         languages: { ru: 'Руская', be: 'Беларуская', en: 'English' },
         denominations: { orthodox: 'Праваслаўны', catholic: 'Католік', baptist: 'Баптыст', pentecostal: 'Пяцідзясятнік', charismatic: 'Харызмат', other: 'Іншы' },
         interestsList: { prayer: 'Памаліцца', bibleStudy: 'Вывучыць Біблію', homeGroup: 'Знайсці хатнюю групу', churchService: 'Наведаць службу', fellowship: 'Супольнасць', mentoring: 'Настаўніцтва' },
-        statusesList: { readyToPray: 'Гатовы памаліцца', readyToChat: 'Гатовы пагутарыць', lookingHomeGroup: 'Шукаю хатнюю групу', lookingFriends: 'Шукаю сяброў-хрысціян', openToTalk: 'Адкрыты для размовы' },
+        statusesList: { readyToPray: 'Гатовы памаліцца', readyToChat: 'Гатовы пагутарыць', lookingHomeGroup: 'Шукаю хатнюю групу', lookingFriends: 'Шукаю сяброў-хрысціян' },
       },
       common: { loading: 'Загрузка...' },
       settings: { icon: 'Іконка', openFor: 'Адкрыты для' },
@@ -50,12 +50,19 @@ const resources = {
         languages: { ru: 'Russian', be: 'Belarusian', en: 'English' },
         denominations: { orthodox: 'Orthodox', catholic: 'Catholic', baptist: 'Baptist', pentecostal: 'Pentecostal', charismatic: 'Charismatic', other: 'Other' },
         interestsList: { prayer: 'Prayer', bibleStudy: 'Bible Study', homeGroup: 'Find a Home Group', churchService: 'Attend Church Service', fellowship: 'Fellowship', mentoring: 'Mentoring' },
-        statusesList: { readyToPray: 'Ready to Pray', readyToChat: 'Ready to Chat', lookingHomeGroup: 'Looking for a Home Group', lookingFriends: 'Looking for Christian Friends', openToTalk: 'Open to Talk' },
+        statusesList: { readyToPray: 'Ready to Pray', readyToChat: 'Ready to Chat', lookingHomeGroup: 'Looking for a Home Group', lookingFriends: 'Looking for Christian Friends' },
       },
       common: { loading: 'Loading...' },
       settings: { icon: 'Icon', openFor: 'Open to' },
     },
   },
+};
+
+export const statusIcons: Record<string, string> = {
+  readyToPray: '🙏',
+  readyToChat: '💬',
+  lookingHomeGroup: '🏠',
+  lookingFriends: '👫',
 };
 
 i18n.use(initReactI18next).init({

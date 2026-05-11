@@ -3,8 +3,11 @@
 ## Project
 Mobile PWA app for Christians to connect. React + TypeScript + Vite + Tailwind + Leaflet + Supabase.
 
-## Git — NEVER commit autonomously
-**Never commit or push unless the user explicitly says "commit" or "push".** Only show the diff and wait for instructions.
+## Git — NEVER commit or push without explicit permission
+**NEVER commit, push, or deploy unless the user explicitly says "commit" and "push" (or "deploy").**
+- After completing work, show what was done and wait for the user's command.
+- Do NOT assume that finishing a task means you can commit — always ask first.
+- This rule applies to all git operations: commit, push, deploy, merge, PR creation.
 
 ## Tech Stack
 - **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, Zustand, React Router v7
