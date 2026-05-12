@@ -4,10 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useInstallStore } from '../../store/installStore';
 import { useProfileStore } from '../../store/profileStore';
-
-const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-  || window.matchMedia('(display-mode: minimal-ui)').matches
-  || (window.navigator as any).standalone === true;
+import { isStandalone } from '../../lib/isStandalone';
 
 const tabs = [
   { path: '/map', icon: '🗺️', labelKey: 'nav.map' },

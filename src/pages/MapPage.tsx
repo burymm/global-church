@@ -1,18 +1,20 @@
-import { useEffect, useCallback, useRef } from 'react'
-import i18n, { statusIcons } from '../i18n'
-import { useLocationStore } from '../store/locationStore'
-import { useAuthStore } from '../store/authStore'
-import { useChatStore } from '../store/chatStore'
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
-import L from 'leaflet'
+import { useEffect, useCallback, useRef, useMemo } from 'react';
+import { createRoot } from 'react-dom/client';
+import i18n, { statusIcons } from '../i18n';
+import { useLocationStore } from '../store/locationStore';
+import { useAuthStore } from '../store/authStore';
+import { useChatStore } from '../store/chatStore';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import type { UserLocation } from '../types';
 
 L.Icon.Default.mergeOptions({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-})
+});
 
-const defaultCenter: [number, number] = [53.9, 27.56]
+const defaultCenter: [number, number] = [53.9, 27.56];
 
 function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371000;
@@ -26,14 +28,14 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
 
 const CLUSTER_RADIUS = 30;
 
-function groupLocations(locations: any[]): any[] {
+function groupLocations(locations: UserLocation[]): (UserLocation | UserLocation[])[] {
   const assigned = new Set<string>();
-  const groups: any[][] = [];
+  const groups: UserLocation[][] = [];
 
   for (const a of locations) {
     if (assigned.has(a.user_id)) continue;
 
-    const cluster: any[] = [a];
+    const cluster: UserLocation[] = [a];
     assigned.add(a.user_id);
 
     for (const b of locations) {
@@ -55,15 +57,14 @@ function userIcon(emoji: string, isMe: boolean) {
     className: '',
     html: `<div style="background:${isMe ? '#10b981' : '#3b82f6'};width:28px;height:28px;border-radius:50%;border:3px solid ${isMe ? '#059669' : 'white'};box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-size:14px;color:white;">${emoji}</div>`,
     iconSize: [28, 28], iconAnchor: [14, 14],
-  })
+  });
 }
 
 const ZOOM_ME = 18;
 
 function LocateControl() {
-  const map = useMap()
-  const { isSharing, startSharing, stopSharing } = useLocationStore()
-  const btnRef = useRef<HTMLButtonElement | null>(null)
+  const map = useMap();
+  const { isSharing, startSharing, stopSharing } = useLocationStore();
 
   const handleLocate = useCallback(async () => {
     if (isSharing) {
@@ -71,53 +72,59 @@ function LocateControl() {
     } else {
       await startSharing();
     }
-  }, [isSharing, startSharing, stopSharing])
+  }, [isSharing, startSharing, stopSharing]);
+
+  const handleCenter = useCallback(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], ZOOM_ME),
+      () => {},
+      { enableHighAccuracy: true, timeout: 5000 },
+    );
+  }, [map]);
 
   useEffect(() => {
-    const updateText = () => {
-      if (btnRef.current) {
-        btnRef.current.innerHTML = isSharing ? i18n.t('map.stopSharing') : i18n.t('map.shareLocation');
-      }
+    const container = L.DomUtil.create('div');
+    container.className = 'flex flex-row gap-1';
+
+    const root = createRoot(container);
+
+    const render = () => {
+      root.render(
+        <>
+          <button onClick={handleLocate}
+            className="px-3 py-2 bg-white rounded-lg shadow-md border-none cursor-pointer text-xs whitespace-nowrap hover:bg-gray-50">
+            {isSharing ? i18n.t('map.stopSharing') : i18n.t('map.shareLocation')}
+          </button>
+          <button onClick={handleCenter} title={i18n.t('map.centerOnMe')}
+            className="px-3 py-2 bg-white rounded-lg shadow-md border-none cursor-pointer text-sm hover:bg-gray-50">
+            📍
+          </button>
+        </>
+      );
     };
 
-    const btn = L.DomUtil.create('button')
-    btn.innerHTML = isSharing ? i18n.t('map.stopSharing') : i18n.t('map.shareLocation');
-    btn.style.cssText = 'padding:8px 12px;background:white;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.2);cursor:pointer;border:none;font-size:12px;margin-bottom:4px;'
-    btn.addEventListener('click', handleLocate);
-
-    const centerBtn = L.DomUtil.create('button')
-    centerBtn.innerHTML = '📍'
-    centerBtn.title = i18n.t('map.centerOnMe')
-    centerBtn.style.cssText = 'padding:8px 12px;background:white;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.2);cursor:pointer;border:none;font-size:14px;'
-    centerBtn.addEventListener('click', () => {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], ZOOM_ME),
-        () => {},
-        { enableHighAccuracy: true, timeout: 5000 },
-      );
-    });
-
-    const container = L.DomUtil.create('div')
-    container.appendChild(btn)
-    container.appendChild(centerBtn)
+    render();
 
     const Ctrl = L.Control.extend({
       options: { position: 'topleft' },
       onAdd: () => container,
-    })
-    const ctrl = new Ctrl()
-    map.addControl(ctrl)
+    });
+    const ctrl = new Ctrl();
+    map.addControl(ctrl);
 
-    btnRef.current = btn;
-    i18n.on('languageChanged', updateText)
-    return () => { map.removeControl(ctrl); btnRef.current = null; }
-  }, [map, isSharing, handleLocate])
-  return null
+    i18n.on('languageChanged', render);
+    return () => {
+      map.removeControl(ctrl);
+      root.unmount();
+      i18n.off('languageChanged', render);
+    };
+  }, [map, isSharing, handleLocate, handleCenter]);
+  return null;
 }
 
 function CenterOnMe() {
-  const map = useMap()
-  const { isSharing } = useLocationStore()
+  const map = useMap();
+  const { isSharing } = useLocationStore();
 
   useEffect(() => {
     if (!isSharing) return;
@@ -126,15 +133,15 @@ function CenterOnMe() {
       () => {},
       { enableHighAccuracy: true, timeout: 5000 },
     );
-  }, [isSharing]);
+  }, [map, isSharing]);
 
-  return null
+  return null;
 }
 
 function MapClickHandler() {
-  const { setActiveUser } = useChatStore()
-  useMapEvents({ click: () => setActiveUser(null) })
-  return null
+  const { setActiveUser } = useChatStore();
+  useMapEvents({ click: () => setActiveUser(null) });
+  return null;
 }
 
 function churchIcon(count: number) {
@@ -142,13 +149,13 @@ function churchIcon(count: number) {
     className: '',
     html: `<div style="position:relative;background:#f59e0b;width:36px;height:36px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;color:white">⛪<span style="position:absolute;bottom:-4px;right:-6px;background:#ef4444;color:white;font-size:10px;font-weight:bold;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid white">${count}</span></div>`,
     iconSize: [36, 36], iconAnchor: [18, 18],
-  })
+  });
 }
 
-function GroupPopupContent({ members, onChat }: { members: any[]; onChat: (userId: string) => void }) {
+function GroupPopupContent({ members, onChat }: { members: UserLocation[]; onChat: (userId: string) => void }) {
   return (
     <div className="min-w-[160px]">
-      {members.map((m: any) => (
+      {members.map((m) => (
         <button key={m.user_id} onClick={() => onChat(m.user_id)}
           className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded text-left">
           <span className="text-lg">{m.display_icon || '✝'}</span>
@@ -163,10 +170,10 @@ function GroupPopupContent({ members, onChat }: { members: any[]; onChat: (userI
         </button>
       ))}
     </div>
-  )
+  );
 }
 
-function PopupContent({ loc }: { loc: any }) {
+function PopupContent({ loc }: { loc: UserLocation }) {
   return (
     <div className="text-center min-w-[140px]">
       {loc.avatar_url && (
@@ -182,53 +189,53 @@ function PopupContent({ loc }: { loc: any }) {
         </p>
       )}
     </div>
-  )
+  );
 }
 
 export function MapPage() {
-  const { userLocations, fetchOnlineLocations, startHeartbeat, stopHeartbeat, startSharing } = useLocationStore()
-  const { activeUserId, setActiveUser } = useChatStore()
-  const { user: currentUser } = useAuthStore()
-  const markerRefs = useRef<Map<string, L.Marker>>(new Map())
-  const prevActive = useRef<string | null>(null)
+  const { userLocations, fetchOnlineLocations, startHeartbeat, stopHeartbeat, startSharing } = useLocationStore();
+  const { activeUserId, setActiveUser } = useChatStore();
+  const { user: currentUser } = useAuthStore();
+  const markerRefs = useRef<Map<string, L.Marker>>(new Map());
+  const prevActive = useRef<string | null>(null);
 
   useEffect(() => {
-    fetchOnlineLocations()
-    const interval = setInterval(fetchOnlineLocations, 30000)
-    return () => clearInterval(interval)
-  }, [fetchOnlineLocations])
+    fetchOnlineLocations();
+    const interval = setInterval(fetchOnlineLocations, 30000);
+    return () => clearInterval(interval);
+  }, [fetchOnlineLocations]);
 
   useEffect(() => {
-    startHeartbeat()
-    return () => stopHeartbeat()
-  }, [])
+    startHeartbeat();
+    return () => stopHeartbeat();
+  }, [startHeartbeat, stopHeartbeat]);
 
   useEffect(() => {
-    if (currentUser?.is_sharing_location) startSharing()
-  }, [])
+    if (currentUser?.is_sharing_location) startSharing();
+  }, [currentUser, startSharing]);
 
   useEffect(() => {
-    const prev = prevActive.current
-    const curr = activeUserId
+    const prev = prevActive.current;
+    const curr = activeUserId;
 
     if (prev && prev !== curr) {
-      markerRefs.current.get(prev)?.closePopup()
+      markerRefs.current.get(prev)?.closePopup();
     }
 
     if (curr) {
-      markerRefs.current.get(curr)?.openPopup()
+      markerRefs.current.get(curr)?.openPopup();
     }
 
-    prevActive.current = curr
-  }, [activeUserId])
+    prevActive.current = curr;
+  }, [activeUserId]);
 
   const handleMarkerRef = useCallback((userId: string, el: L.Marker | null) => {
-    if (el) markerRefs.current.set(userId, el)
-    else markerRefs.current.delete(userId)
-  }, [])
+    if (el) markerRefs.current.set(userId, el);
+    else markerRefs.current.delete(userId);
+  }, []);
 
-  const myId = currentUser?.id
-  const grouped = groupLocations(userLocations)
+  const myId = currentUser?.id;
+  const grouped = useMemo(() => groupLocations(userLocations), [userLocations]);
 
   return (
     <div className="relative h-full pb-16">
@@ -269,5 +276,5 @@ export function MapPage() {
         })}
       </MapContainer>
     </div>
-  )
+  );
 }

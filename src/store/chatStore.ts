@@ -1,13 +1,25 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import type { Message } from '../types';
+import type { RealtimeChannel } from '@supabase/supabase-js';
+
+interface Conversation {
+  id: string;
+  other_user_id: string;
+  other_user: {
+    display_name: string;
+    avatar_url: string | null;
+  };
+  last_message: string;
+  last_message_at: string;
+}
 
 interface ChatState {
   messages: Message[];
-  conversations: any[];
+  conversations: Conversation[];
   activeUserId: string | null;
   isLoading: boolean;
-  _channel: any;
+  _channel: RealtimeChannel | null;
   fetchMessages: (userId: string) => Promise<void>;
   fetchConversations: () => Promise<void>;
   sendMessage: (userId: string, content: string) => Promise<void>;
@@ -33,7 +45,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       .or(`and(sender_id.eq.${session.user.id},recipient_id.eq.${userId}),and(sender_id.eq.${userId},recipient_id.eq.${session.user.id})`)
       .order('created_at', { ascending: true })
       .limit(100);
-    set({ messages: data as Message[] || [], isLoading: false });
+    set({ messages: (data as Message[]) || [], isLoading: false });
   },
 
   fetchConversations: async () => {
@@ -45,13 +57,33 @@ export const useChatStore = create<ChatState>((set, get) => ({
       .or(`sender_id.eq.${session.user.id},recipient_id.eq.${session.user.id}`)
       .order('created_at', { ascending: false })
       .limit(200);
-    const convMap = new Map();
+    const userIds = new Set<string>();
+    for (const msg of (messages || [])) {
+      userIds.add(msg.sender_id === session.user.id ? msg.recipient_id : msg.sender_id);
+    }
+    if (userIds.size === 0) {
+      set({ conversations: [] });
+      return;
+    }
+    const { data: users } = await supabase
+      .from('users')
+      .select('id, display_name, avatar_url')
+      .in('id', Array.from(userIds));
+    const userMap = new Map((users || []).map((u: any) => [u.id, u]));
+    const convMap = new Map<string, Conversation>();
     for (const msg of (messages || [])) {
       const otherId = msg.sender_id === session.user.id ? msg.recipient_id : msg.sender_id;
       if (!convMap.has(otherId)) {
+        const otherUser = userMap.get(otherId);
         convMap.set(otherId, {
-          id: otherId, user_id: session.user.id, other_user_id: otherId,
-          other_user: { display_name: '', avatar_url: null, last_message: msg.content, last_message_at: msg.created_at },
+          id: otherId,
+          other_user_id: otherId,
+          other_user: {
+            display_name: otherUser?.display_name || '',
+            avatar_url: otherUser?.avatar_url || null,
+          },
+          last_message: msg.content,
+          last_message_at: msg.created_at,
         });
       }
     }
@@ -79,13 +111,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   unsubscribe: () => {
-    const state = get() as any;
-    if (state._channel) { supabase.removeChannel(state._channel); }
+    const { _channel } = get();
+    if (_channel) { supabase.removeChannel(_channel); }
   },
 
   setActiveUser: (userId: string | null) => {
     get().unsubscribe();
     set({ activeUserId: userId });
-    if (userId) { get().fetchMessages(userId); get().subscribe(userId); }
+    if (userId) {
+      get().fetchMessages(userId);
+      get().subscribe(userId);
+    }
   },
 }));

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
+import type { Session } from '@supabase/supabase-js';
 
 export function AuthCallbackPage() {
   const { t } = useTranslation();
@@ -11,7 +12,7 @@ export function AuthCallbackPage() {
   useEffect(() => {
     let handled = false;
 
-    const upsertUser = async (session: any) => {
+    const upsertUser = async (session: Session) => {
       if (handled) return;
       handled = true;
 
@@ -38,7 +39,7 @@ export function AuthCallbackPage() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
-        await upsertUser(session);
+        await upsertUser(session as Session);
       }
     });
 

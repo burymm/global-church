@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from './store/authStore';
 import { MapPage } from './pages/MapPage';
 import { ChatPage } from './pages/ChatPage';
-import { ProfilePage } from './pages/ProfilePage';
 import { AuthPage } from './pages/AuthPage';
 import { AuthCallbackPage } from './pages/AuthCallbackPage';
 import { BottomNav } from './components/ui/BottomNav';
@@ -33,7 +32,6 @@ export default function App() {
                 <Route path="/" element={<MapPage />} />
                 <Route path="/map" element={<MapPage />} />
                 <Route path="/chat" element={<ChatPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </>
             ) : (

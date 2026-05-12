@@ -1,9 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useInstallStore, isIOS } from '../store/installStore';
-
-const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-  || window.matchMedia('(display-mode: minimal-ui)').matches
-  || (window.navigator as any).standalone === true;
+import { isStandalone } from '../lib/isStandalone';
 
 export function PwaInstallPrompt() {
   const { t } = useTranslation();

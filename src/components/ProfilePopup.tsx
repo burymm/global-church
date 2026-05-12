@@ -3,39 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
 import { useProfileStore } from '../store/profileStore';
 import { statusIcons } from '../i18n';
-
-const emojis = ['✝', '⛪', '🙏', '📖', '🔥', '💧', '🕊', '🌟', '⚓', '🎯', '💡', '🌿', '☀️', '❤️', '🤝', '👨', '👨‍🦳', '🧔', '👳', '🙎'];
-
-const denominations = [
-  { value: 'orthodox', labelKey: 'profile.denominations.orthodox' },
-  { value: 'catholic', labelKey: 'profile.denominations.catholic' },
-  { value: 'baptist', labelKey: 'profile.denominations.baptist' },
-  { value: 'pentecostal', labelKey: 'profile.denominations.pentecostal' },
-  { value: 'charismatic', labelKey: 'profile.denominations.charismatic' },
-  { value: 'other', labelKey: 'profile.denominations.other' },
-];
-
-const interests = [
-  { value: 'prayer', labelKey: 'profile.interestsList.prayer' },
-  { value: 'bibleStudy', labelKey: 'profile.interestsList.bibleStudy' },
-  { value: 'homeGroup', labelKey: 'profile.interestsList.homeGroup' },
-  { value: 'churchService', labelKey: 'profile.interestsList.churchService' },
-  { value: 'fellowship', labelKey: 'profile.interestsList.fellowship' },
-  { value: 'mentoring', labelKey: 'profile.interestsList.mentoring' },
-];
-
-const statuses = [
-  { value: 'readyToPray', labelKey: 'profile.statusesList.readyToPray' },
-  { value: 'readyToChat', labelKey: 'profile.statusesList.readyToChat' },
-  { value: 'lookingHomeGroup', labelKey: 'profile.statusesList.lookingHomeGroup' },
-  { value: 'lookingFriends', labelKey: 'profile.statusesList.lookingFriends' },
-];
-
-const languages = [
-  { value: 'ru' as const, labelKey: 'profile.languages.ru' },
-  { value: 'be' as const, labelKey: 'profile.languages.be' },
-  { value: 'en' as const, labelKey: 'profile.languages.en' },
-];
+import { emojis, denominations, interests, statuses, languages, toggle } from '../lib/profileConstants';
 
 export function ProfilePopup() {
   const { t, i18n } = useTranslation();
@@ -48,12 +16,8 @@ export function ProfilePopup() {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>(user?.statuses || []);
   const [language, setLanguage] = useState(user?.language || 'ru');
 
-  const toggle = (list: string[], value: string, setter: (v: string[]) => void) => {
-    setter(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
-  };
-
-  const handleSave = () => {
-    updateUser({ display_name: displayName, display_icon: selectedEmoji, denomination, interests: selectedInterests, statuses: selectedStatuses, language });
+  const handleSave = async () => {
+    await updateUser({ display_name: displayName, display_icon: selectedEmoji, denomination, interests: selectedInterests, statuses: selectedStatuses, language });
     i18n.changeLanguage(language);
     close();
   };

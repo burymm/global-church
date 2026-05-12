@@ -2,9 +2,10 @@ import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import i18n from '../i18n';
 import type { User } from '../types';
+import type { Session } from '@supabase/supabase-js';
 
 interface AuthState {
-  session: any | null;
+  session: Session | null;
   user: User | null;
   isLoading: boolean;
   init: () => () => void;
@@ -28,19 +29,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
         if (session) {
           try {
-            const supabaseUrl = (supabase as any).supabaseUrl;
-            const supabaseKey = (supabase as any).supabaseKey;
+            const { data: users, error } = await supabase
+              .from('users')
+              .select('*')
+              .eq('id', session.user.id)
+              .maybeSingle();
 
-            const url = `${supabaseUrl}/rest/v1/users?id=eq.${session.user.id}&select=*`;
-            const resp = await fetch(url, {
-              headers: {
-                'apikey': supabaseKey,
-                'Authorization': `Bearer ${session.access_token}`,
-                'Content-Type': 'application/json',
-              },
-            });
-            const body = await resp.json();
-            const user = body?.[0] as User | undefined;
+            if (error) throw error;
+            const user = users as User | undefined;
             if (user?.language) i18n.changeLanguage(user.language);
             set({ session, user, isLoading: false });
           } catch {
@@ -70,8 +66,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   updateUser: async (updates: Partial<User>) => {
-    if (!get().session) return;
-    await supabase.from('users').update(updates).eq('id', get().session.user.id);
-    set({ user: get().user ? ({ ...get().user, ...updates } as User) : null });
+    const session = get().session;
+    if (!session) return;
+    await supabase.from('users').update(updates).eq('id', session.user.id);
+    const currentUser = get().user;
+    set({ user: currentUser ? { ...currentUser, ...updates } : null });
   },
 }));

@@ -4,7 +4,7 @@ import { useChatStore } from '../store/chatStore';
 import { useAuthStore } from '../store/authStore';
 
 export function ChatPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { conversations, messages, activeUserId, setActiveUser, sendMessage, fetchConversations, isLoading } = useChatStore();
   const { user } = useAuthStore();
   const [input, setInput] = useState('');
@@ -32,7 +32,7 @@ export function ChatPage() {
               <div className={`max-w-xs px-4 py-2 rounded-2xl ${msg.sender_id === user?.id ? 'bg-blue-600 text-white' : 'bg-white text-gray-900'}`}>
                 <p className="text-sm">{msg.content}</p>
                 <p className={`text-xs mt-1 ${msg.sender_id === user?.id ? 'text-blue-200' : 'text-gray-400'}`}>
-                  {new Date(msg.created_at).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })}
+                  {new Date(msg.created_at).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
             </div>
