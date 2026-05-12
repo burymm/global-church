@@ -31,6 +31,7 @@ export const useLocationStore = create<LocationState>((set, get) => ({
       .maybeSingle();
 
     const blocked = (me?.blocked_user_ids as string[]) || [];
+    const myId = (await supabase.auth.getSession()).data.session?.user.id;
 
     const { data } = await supabase
       .from('users')
@@ -48,6 +49,15 @@ export const useLocationStore = create<LocationState>((set, get) => ({
         is_online: u.is_online,
       }));
     set({ userLocations: locations });
+
+    const isSharingInDB = data?.some((u: any) => u.id === myId) || false;
+    const { isSharing, watchId } = get();
+    if (isSharingInDB !== isSharing) {
+      if (!isSharingInDB && watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+      set({ isSharing: isSharingInDB, watchId: isSharingInDB ? watchId : null });
+    }
   },
 
   startHeartbeat: () => {

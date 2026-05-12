@@ -88,7 +88,7 @@ function PopupContent({ loc }: { loc: any }) {
 }
 
 export function MapPage() {
-  const { userLocations, fetchOnlineLocations, startHeartbeat, stopHeartbeat } = useLocationStore()
+  const { userLocations, fetchOnlineLocations, startHeartbeat, stopHeartbeat, startSharing } = useLocationStore()
   const { activeUserId, setActiveUser } = useChatStore()
   const { user: currentUser } = useAuthStore()
   const markerRefs = useRef<Map<string, L.Marker>>(new Map())
@@ -103,6 +103,10 @@ export function MapPage() {
   useEffect(() => {
     startHeartbeat()
     return () => stopHeartbeat()
+  }, [])
+
+  useEffect(() => {
+    if (currentUser?.is_sharing_location) startSharing()
   }, [])
 
   useEffect(() => {
