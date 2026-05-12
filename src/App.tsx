@@ -8,6 +8,8 @@ import { ProfilePage } from './pages/ProfilePage';
 import { AuthPage } from './pages/AuthPage';
 import { AuthCallbackPage } from './pages/AuthCallbackPage';
 import { BottomNav } from './components/ui/BottomNav';
+import { PwaInstallPrompt } from './components/PwaInstallPrompt';
+import { ProfilePopup } from './components/ProfilePopup';
 
 export default function App() {
   const { session, isLoading, init } = useAuthStore();
@@ -44,6 +46,8 @@ export default function App() {
           </Routes>
         </div>
         {session && <BottomNav />}
+        <PwaInstallPrompt />
+        {session && <ProfilePopup />}
       </div>
     </BrowserRouter>
   );
