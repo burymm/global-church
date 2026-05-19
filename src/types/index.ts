@@ -26,6 +26,7 @@ export interface Message {
   recipient_id: string;
   content: string;
   is_read: boolean;
+  status: 'sent' | 'delivered' | 'read';
 }
 
 export interface UserLocation {

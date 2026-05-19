@@ -3,6 +3,23 @@
 ## Project
 Mobile PWA app for Christians to connect. React + TypeScript + Vite + Tailwind + Leaflet + Supabase.
 
+## Workflow — discuss → approve → code
+**Before writing any code for a new feature or bugfix:**
+1. First discuss requirements with the user, ask questions, understand the task
+2. Create a task/todo list outlining what needs to be done
+3. Present the plan to the user and **wait for explicit approval** before writing any code
+4. Only start implementing after the user says "go ahead" or equivalent
+5. After implementation, run the build and verify before presenting results
+
+This rule applies to ALL code changes — features, bugfixes, refactoring. No code without prior approval.
+
+## Backlog Structure
+- `backlog/tasks/` — individual task files (`task-01-*.md`, `task-02-*.md`)
+- `backlog/bugs/` — individual bug files (`bug-01-*.md`)
+- `backlog/docs/` — project documentation
+
+Create a task or bug file first, then wait for approval before coding.
+
 ## Git — NEVER commit or push without explicit permission
 **NEVER commit, push, or deploy unless the user explicitly says "commit" and "push" (or "deploy").**
 - After completing work, show what was done and wait for the user's command.

@@ -23,9 +23,16 @@ interface ChatState {
   fetchMessages: (userId: string) => Promise<void>;
   fetchConversations: () => Promise<void>;
   sendMessage: (userId: string, content: string) => Promise<void>;
+  deleteConversation: (userId: string) => Promise<void>;
+  markAsDelivered: (messageId: string) => Promise<void>;
+  markAsRead: (userId: string) => Promise<void>;
   subscribe: (userId: string) => Promise<void>;
   unsubscribe: () => void;
   setActiveUser: (userId: string | null) => void;
+}
+
+function parseMessage(data: any): Message {
+  return { ...data, status: data.status || 'sent' };
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -45,7 +52,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       .or(`and(sender_id.eq.${session.user.id},recipient_id.eq.${userId}),and(sender_id.eq.${userId},recipient_id.eq.${session.user.id})`)
       .order('created_at', { ascending: true })
       .limit(100);
-    set({ messages: (data as Message[]) || [], isLoading: false });
+    set({ messages: ((data as any[]) || []).map(parseMessage), isLoading: false });
   },
 
   fetchConversations: async () => {
@@ -93,33 +100,98 @@ export const useChatStore = create<ChatState>((set, get) => ({
   sendMessage: async (userId: string, content: string) => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
-    await supabase.from('messages').insert({ sender_id: session.user.id, recipient_id: userId, content });
+    const { data } = await supabase.from('messages').insert({ sender_id: session.user.id, recipient_id: userId, content }).select().single();
+    if (data) {
+      const msg = parseMessage(data);
+      set((state) => {
+        if (state.messages.some((m) => m.id === msg.id)) return state;
+        return { messages: [...state.messages, msg] };
+      });
+    }
+  },
+
+  deleteConversation: async (userId: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    await supabase
+      .from('messages')
+      .delete()
+      .or(`and(sender_id.eq.${session.user.id},recipient_id.eq.${userId}),and(sender_id.eq.${userId},recipient_id.eq.${session.user.id})`);
+    set((state) => ({
+      conversations: state.conversations.filter((c) => c.other_user_id !== userId),
+      messages: [],
+      activeUserId: null,
+    }));
+  },
+
+  markAsDelivered: async (messageId: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    const { error } = await supabase.from('messages').update({ status: 'delivered' }).eq('id', messageId).or('status.eq.sent,status.is.null');
+    if (error) console.error('markAsDelivered error', error);
+    set((state) => ({
+      messages: state.messages.map((m) => m.id === messageId && (m.status === 'sent' || !m.status) ? { ...m, status: 'delivered' as const } : m),
+    }));
+  },
+
+  markAsRead: async (userId: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    const { data, error } = await supabase
+      .from('messages')
+      .update({ is_read: true, status: 'read' })
+      .eq('recipient_id', session.user.id)
+      .eq('sender_id', userId)
+      .neq('is_read', true)
+      .select();
+    if (error) console.error('markAsRead error', error);
+    if (data && data.length > 0) {
+      const readIds = new Set(data.map((m: any) => m.id));
+      set((state) => ({
+        messages: state.messages.map((m) => readIds.has(m.id) ? { ...m, is_read: true, status: 'read' as const } : m),
+      }));
+    }
   },
 
   subscribe: async (userId: string) => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
-    const channel = supabase.channel('chat-changes')
+    const channelName = `chat-${userId}-${Date.now()}`;
+    const channel = supabase.channel(channelName)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `recipient_id=eq.${session.user.id}` },
         (payload) => {
-          const newMsg = payload.new as Message;
-          const { messages, activeUserId } = get();
-          if (newMsg.sender_id === activeUserId || newMsg.sender_id === userId) set({ messages: [...messages, newMsg] });
+          const newMsg = parseMessage(payload.new as Message);
+          const { activeUserId } = get();
+          if (newMsg.sender_id === activeUserId || newMsg.sender_id === userId) {
+            set((state) => {
+              if (state.messages.some((m) => m.id === newMsg.id)) return state;
+              return { messages: [...state.messages, newMsg] };
+            });
+            get().markAsDelivered(newMsg.id);
+          }
+        })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `sender_id=eq.${session.user.id}` },
+        (payload) => {
+          const updated = payload.new as Message;
+          set((state) => ({
+            messages: state.messages.map((m) => m.id === updated.id ? { ...m, is_read: updated.is_read, status: updated.status || m.status } : m),
+          }));
         })
       .subscribe();
     set({ _channel: channel });
   },
 
-  unsubscribe: () => {
+  unsubscribe: async () => {
     const { _channel } = get();
-    if (_channel) { supabase.removeChannel(_channel); }
+    if (_channel) { await supabase.removeChannel(_channel); }
   },
 
-  setActiveUser: (userId: string | null) => {
-    get().unsubscribe();
+  setActiveUser: async (userId: string | null) => {
+    await get().unsubscribe();
     set({ activeUserId: userId });
     if (userId) {
-      get().fetchMessages(userId);
+      await get().fetchMessages(userId);
+      get().markAsRead(userId);
       get().subscribe(userId);
     }
   },

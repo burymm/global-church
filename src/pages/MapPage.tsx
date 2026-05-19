@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useRef, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
+import { useNavigate } from 'react-router-dom';
 import i18n, { statusIcons } from '../i18n';
 import { useLocationStore } from '../store/locationStore';
 import { useAuthStore } from '../store/authStore';
@@ -152,28 +153,36 @@ function churchIcon(count: number) {
   });
 }
 
-function GroupPopupContent({ members, onChat }: { members: UserLocation[]; onChat: (userId: string) => void }) {
+function GroupPopupContent({ members, currentUserStatuses, currentUserId }: { members: UserLocation[]; currentUserStatuses: string[]; currentUserId?: string }) {
+  const navigate = useNavigate();
   return (
     <div className="min-w-[160px]">
-      {members.map((m) => (
-        <button key={m.user_id} onClick={() => onChat(m.user_id)}
-          className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded text-left">
-          <span className="text-lg">{m.display_icon || '✝'}</span>
-          <div className="min-w-0">
-            <p className="text-sm font-medium truncate">{m.display_name}</p>
-            {m.statuses?.length > 0 && (
-              <p className="text-xs text-blue-600 truncate">
-                {m.statuses.map((s: string) => `${statusIcons[s] || ''} ${i18n.t(`profile.statusesList.${s}`)}`).join(' · ')}
-              </p>
-            )}
-          </div>
-        </button>
-      ))}
+      {members.map((m) => {
+        const canChat = m.user_id !== currentUserId && m.statuses?.includes('readyToChat') && currentUserStatuses.includes('readyToChat');
+        return (
+          <button key={m.user_id} onClick={() => { if (canChat) navigate(`/chat/${m.user_id}`); }}
+            className={`w-full flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded text-left ${canChat ? 'cursor-pointer' : 'cursor-default'}`}>
+            <span className="text-lg">{m.display_icon || '✝'}</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium truncate">{m.display_name}</p>
+              {m.statuses?.length > 0 && (
+                <p className="text-xs text-blue-600 truncate">
+                  {m.statuses.map((s: string) => `${statusIcons[s] || ''} ${i18n.t(`profile.statusesList.${s}`)}`).join(' · ')}
+                </p>
+              )}
+            </div>
+            {canChat && <span className="text-lg">💬</span>}
+          </button>
+        );
+      })}
     </div>
   );
 }
 
-function PopupContent({ loc }: { loc: UserLocation }) {
+function PopupContent({ loc, currentUserStatuses, currentUserId }: { loc: UserLocation; currentUserStatuses: string[]; currentUserId?: string }) {
+  const navigate = useNavigate();
+  const canChat = loc.user_id !== currentUserId && loc.statuses?.includes('readyToChat') && currentUserStatuses.includes('readyToChat');
+  const handleChat = () => navigate(`/chat/${loc.user_id}`);
   return (
     <div className="text-center min-w-[140px]">
       {loc.avatar_url && (
@@ -188,13 +197,19 @@ function PopupContent({ loc }: { loc: UserLocation }) {
           {loc.statuses.map((s: string) => `${statusIcons[s] || ''} ${i18n.t(`profile.statusesList.${s}`)}`).join(' · ')}
         </p>
       )}
+      {canChat && (
+        <button onClick={handleChat}
+          className="mt-2 bg-blue-600 text-white rounded-full px-4 py-1.5 text-sm font-medium">
+          💬 {i18n.t('chat.chatLabel')}
+        </button>
+      )}
     </div>
   );
 }
 
 export function MapPage() {
   const { userLocations, fetchOnlineLocations, startHeartbeat, stopHeartbeat, startSharing } = useLocationStore();
-  const { activeUserId, setActiveUser } = useChatStore();
+  const { activeUserId } = useChatStore();
   const { user: currentUser } = useAuthStore();
   const markerRefs = useRef<Map<string, L.Marker>>(new Map());
   const prevActive = useRef<string | null>(null);
@@ -238,7 +253,7 @@ export function MapPage() {
   const grouped = useMemo(() => groupLocations(userLocations), [userLocations]);
 
   return (
-    <div className="relative h-full pb-16">
+    <div className="relative h-full">
       <MapContainer center={defaultCenter} zoom={12} zoomControl={false} style={{ width: '100%', height: '100%' }}>
         <TileLayer attribution="" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
         <LocateControl />
@@ -255,7 +270,7 @@ export function MapPage() {
                 icon={churchIcon(item.length)}
               >
                 <Popup>
-                  <GroupPopupContent members={item} onChat={setActiveUser} />
+                  <GroupPopupContent members={item} currentUserStatuses={currentUser?.statuses || []} currentUserId={currentUser?.id} />
                 </Popup>
               </Marker>
             );
@@ -266,10 +281,9 @@ export function MapPage() {
               ref={(el) => handleMarkerRef(item.user_id, el as any)}
               position={[item.lat, item.lng]}
               icon={userIcon(item.display_icon || '✝', item.user_id === myId)}
-              eventHandlers={{ click: () => setActiveUser(item.user_id) }}
             >
               <Popup>
-                <PopupContent loc={item} />
+                <PopupContent loc={item} currentUserStatuses={currentUser?.statuses || []} currentUserId={currentUser?.id} />
               </Popup>
             </Marker>
           );

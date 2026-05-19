@@ -134,6 +134,14 @@ CREATE POLICY "Users can insert own messages"
   ON messages FOR INSERT
   WITH CHECK (auth.uid() = sender_id);
 
+CREATE POLICY "Users can delete own messages"
+  ON messages FOR DELETE
+  USING (auth.uid() = sender_id OR auth.uid() = recipient_id);
+
+CREATE POLICY "Users can update own messages"
+  ON messages FOR UPDATE
+  USING (auth.uid() = sender_id OR auth.uid() = recipient_id);
+
 -- User locations: opt-in sharing
 ALTER TABLE user_locations ENABLE ROW LEVEL SECURITY;
 
@@ -148,3 +156,22 @@ CREATE POLICY "Users can update own location"
 CREATE POLICY "Users can update own location 2"
   ON user_locations FOR UPDATE
   USING (auth.uid() = user_id);
+
+-- ============================================================
+-- Data API grants (for supabase-js / PostgREST access)
+-- ============================================================
+
+GRANT SELECT, INSERT, UPDATE ON users TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON users TO service_role;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON messages TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON messages TO service_role;
+
+-- Migration: add status column for delivery/read tracking
+-- Run separately if messages table already exists:
+-- ALTER TABLE messages ADD COLUMN status TEXT DEFAULT 'sent' CHECK (status IN ('sent', 'delivered', 'read'));
+-- UPDATE messages SET status = 'read' WHERE is_read = TRUE AND (status IS NULL OR status = 'sent');
+-- UPDATE messages SET status = 'sent' WHERE is_read = FALSE AND status IS NULL;
+
+GRANT SELECT, INSERT, UPDATE ON user_locations TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON user_locations TO service_role;

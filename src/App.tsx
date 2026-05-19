@@ -24,7 +24,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <div className="flex flex-col h-full">
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden pb-20">
           <Routes>
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
             {session ? (
@@ -32,6 +32,7 @@ export default function App() {
                 <Route path="/" element={<MapPage />} />
                 <Route path="/map" element={<MapPage />} />
                 <Route path="/chat" element={<ChatPage />} />
+                <Route path="/chat/:userId" element={<ChatPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </>
             ) : (
