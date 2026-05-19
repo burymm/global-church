@@ -28,15 +28,18 @@ Create a task or bug file first, then wait for approval before coding.
 
 ## Commit Format
 
-Commits follow a numbered format:
+Commits follow a numbered format with release-notes-friendly descriptions:
 
-- Bugs: `[bug-<number>] - <description>`
-- Tasks/features: `[task-<number>] - <description>`
+- Bugs: `[bug-<number>] - <short summary>`
+- Tasks/features: `[task-<number>] - <short summary>`
+
+Write descriptions as release notes — explain WHAT was added/changed in a way that's useful for a changelog. Include key feature names, not implementation details.
 
 Examples:
 ```
 [bug-01] - fix language resets to russian
-[task-11] - added user profile settings, fixed some errors
+[task-11] - added user profile settings with emoji icon, denomination, interests, statuses
+[task-01] - added chat feature: mutual readyToChat gate, /chat/:userId routes, message status (sent/delivered/read), delete conversation, ConfirmDialog
 ```
 
 ## Tech Stack
