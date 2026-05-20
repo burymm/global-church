@@ -12,6 +12,7 @@ interface Conversation {
   };
   last_message: string;
   last_message_at: string;
+  unread_count: number;
 }
 
 interface ChatState {
@@ -35,6 +36,34 @@ function parseMessage(data: any): Message {
   return { ...data, status: data.status || 'sent' };
 }
 
+function sortConversations(list: Conversation[]): Conversation[] {
+  return list.sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
+}
+
+function upsertConversation(
+  list: Conversation[],
+  otherUserId: string,
+  otherUser: { display_name: string; avatar_url: string | null },
+  last_message: string,
+  last_message_at: string,
+  unreadDelta: number,
+): Conversation[] {
+  const idx = list.findIndex((c) => c.other_user_id === otherUserId);
+  const existing = idx >= 0 ? list[idx] : null;
+  const updated: Conversation = {
+    id: otherUserId,
+    other_user_id: otherUserId,
+    other_user: existing ? existing.other_user : otherUser,
+    last_message,
+    last_message_at,
+    unread_count: (existing?.unread_count || 0) + unreadDelta,
+  };
+  const next = idx >= 0 ? [...list] : [...list];
+  if (idx >= 0) next[idx] = updated;
+  else next.push(updated);
+  return sortConversations(next);
+}
+
 export const useChatStore = create<ChatState>((set, get) => ({
   messages: [],
   conversations: [],
@@ -53,7 +82,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
         .or(`and(sender_id.eq.${session.user.id},recipient_id.eq.${userId}),and(sender_id.eq.${userId},recipient_id.eq.${session.user.id})`)
         .order('created_at', { ascending: true })
         .limit(100);
-      set({ messages: ((data as any[]) || []).map(parseMessage), isLoading: false });
+      const parsed = ((data as any[]) || []).map(parseMessage);
+      const unreadCount = parsed.filter((m) => m.recipient_id === session.user.id && !m.is_read).length;
+      set({ messages: parsed, isLoading: false });
+      set((state) => ({
+        conversations: state.conversations.map((c) =>
+          c.other_user_id === userId ? { ...c, unread_count: unreadCount } : c
+        ),
+      }));
     } catch {
       set({ messages: [], isLoading: false });
     }
@@ -65,7 +101,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       const { data: messages } = await supabase
         .from('messages')
-        .select('sender_id, recipient_id, content, created_at')
+        .select('sender_id, recipient_id, content, created_at, is_read')
         .or(`sender_id.eq.${session.user.id},recipient_id.eq.${session.user.id}`)
         .order('created_at', { ascending: false })
         .limit(200);
@@ -96,7 +132,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
             },
             last_message: msg.content,
             last_message_at: msg.created_at,
+            unread_count: 0,
           });
+        }
+      }
+      for (const msg of (messages || [])) {
+        if (msg.recipient_id === session.user.id && !msg.is_read) {
+          const otherId = msg.sender_id;
+          const conv = convMap.get(otherId);
+          if (conv) conv.unread_count++;
         }
       }
       set({ conversations: Array.from(convMap.values()) });
@@ -113,8 +157,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
       if (data) {
         const msg = parseMessage(data);
         set((state) => {
-          if (state.messages.some((m) => m.id === msg.id)) return state;
-          return { messages: [...state.messages, msg] };
+          const messages = state.messages.some((m) => m.id === msg.id)
+            ? state.messages
+            : [...state.messages, msg];
+          const conversations = upsertConversation(
+            state.conversations, userId,
+            state.conversations.find((c) => c.other_user_id === userId)?.other_user || { display_name: '', avatar_url: null },
+            content, msg.created_at, 0,
+          );
+          return { messages, conversations };
         });
       }
     } catch {}
@@ -174,11 +225,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
         (payload) => {
           const newMsg = parseMessage(payload.new as Message);
           const { activeUserId } = get();
+          const unreadDelta = newMsg.sender_id === activeUserId ? 0 : 1;
+          set((state) => {
+            const messages = state.messages.some((m) => m.id === newMsg.id)
+              ? state.messages
+              : [...state.messages, newMsg];
+            const conversations = upsertConversation(
+              state.conversations, newMsg.sender_id,
+              state.conversations.find((c) => c.other_user_id === newMsg.sender_id)?.other_user || { display_name: '', avatar_url: null },
+              newMsg.content, newMsg.created_at, unreadDelta,
+            );
+            return { messages, conversations };
+          });
           if (newMsg.sender_id === activeUserId || newMsg.sender_id === userId) {
-            set((state) => {
-              if (state.messages.some((m) => m.id === newMsg.id)) return state;
-              return { messages: [...state.messages, newMsg] };
-            });
             get().markAsDelivered(newMsg.id);
           }
         })
@@ -200,6 +259,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   setActiveUser: async (userId: string | null) => {
     await get().unsubscribe();
+    if (userId) {
+      set((state) => ({
+        conversations: state.conversations.map((c) =>
+          c.other_user_id === userId ? { ...c, unread_count: 0 } : c
+        ),
+      }));
+    }
     set({ activeUserId: userId });
     if (userId) {
       await get().fetchMessages(userId);

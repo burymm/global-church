@@ -27,6 +27,8 @@ export function ChatPage() {
       return;
     }
 
+    if (activeUserId === userId) return;
+
     const existingConv = conversations.find((c) => c.other_user_id === userId);
     if (existingConv) {
       setGuard('allowed');
@@ -58,7 +60,7 @@ export function ChatPage() {
       }
     };
     checkAccess();
-  }, [userId, conversations]);
+  }, [userId, conversations, activeUserId]);
 
   const handleSend = async () => {
     if (!input.trim() || !userId) return;
@@ -195,6 +197,11 @@ export function ChatPage() {
                 <p className="font-medium truncate">{conv.other_user.display_name || t('chat.noUser')}</p>
                 <p className="text-sm text-gray-500 truncate">{conv.last_message}</p>
               </div>
+              {conv.unread_count > 0 && (
+                <span className="bg-red-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1">
+                  {conv.unread_count}
+                </span>
+              )}
             </button>
           ))}
         </div>

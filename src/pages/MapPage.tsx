@@ -270,7 +270,7 @@ export function MapPage() {
                 icon={churchIcon(item.length)}
               >
                 <Popup>
-                  <GroupPopupContent members={item} currentUserStatuses={currentUser?.statuses || []} currentUserId={currentUser?.id} />
+                  <GroupPopupContent key={`s-${currentUser?.statuses?.join(',')}`} members={item} currentUserStatuses={currentUser?.statuses || []} currentUserId={currentUser?.id} />
                 </Popup>
               </Marker>
             );
@@ -283,7 +283,7 @@ export function MapPage() {
               icon={userIcon(item.display_icon || '✝', item.user_id === myId)}
             >
               <Popup>
-                <PopupContent loc={item} currentUserStatuses={currentUser?.statuses || []} currentUserId={currentUser?.id} />
+                <PopupContent key={`s-${currentUser?.statuses?.join(',')}`} loc={item} currentUserStatuses={currentUser?.statuses || []} currentUserId={currentUser?.id} />
               </Popup>
             </Marker>
           );
