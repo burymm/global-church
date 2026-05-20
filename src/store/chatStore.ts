@@ -21,6 +21,10 @@ interface ChatState {
   activeUserId: string | null;
   isLoading: boolean;
   _channel: RealtimeChannel | null;
+  _globalChannel: RealtimeChannel | null;
+  _sessionUserId: string | null;
+  init: () => Promise<void>;
+  destroy: () => Promise<void>;
   fetchMessages: (userId: string) => Promise<void>;
   fetchConversations: () => Promise<void>;
   sendMessage: (userId: string, content: string) => Promise<void>;
@@ -70,6 +74,48 @@ export const useChatStore = create<ChatState>((set, get) => ({
   activeUserId: null,
   isLoading: false,
   _channel: null,
+  _globalChannel: null,
+  _sessionUserId: null,
+
+  init: async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    set({ _sessionUserId: session.user.id });
+    await get().fetchConversations();
+
+    const channel = supabase.channel('conversations-global')
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload) => {
+          const msg = payload.new as any;
+          const userId = get()._sessionUserId;
+          if (!userId) return;
+          if (msg.sender_id !== userId && msg.recipient_id !== userId) return;
+
+          const otherUserId = msg.sender_id === userId ? msg.recipient_id : msg.sender_id;
+          const unreadDelta = msg.recipient_id === userId ? 1 : 0;
+
+          set((state) => ({
+            conversations: upsertConversation(
+              state.conversations,
+              otherUserId,
+              state.conversations.find((c) => c.other_user_id === otherUserId)?.other_user || { display_name: '', avatar_url: null },
+              msg.content,
+              msg.created_at,
+              unreadDelta,
+            ),
+          }));
+        })
+      .subscribe();
+    set({ _globalChannel: channel });
+  },
+
+  destroy: async () => {
+    const { _globalChannel, _channel } = get();
+    if (_globalChannel) await supabase.removeChannel(_globalChannel);
+    if (_channel) await supabase.removeChannel(_channel);
+    set({ _globalChannel: null, _channel: null, _sessionUserId: null, conversations: [], messages: [], activeUserId: null });
+  },
 
   fetchMessages: async (userId: string) => {
     set({ isLoading: true });
@@ -255,6 +301,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   unsubscribe: async () => {
     const { _channel } = get();
     if (_channel) { await supabase.removeChannel(_channel); }
+    set({ _channel: null });
   },
 
   setActiveUser: async (userId: string | null) => {
