@@ -18,6 +18,7 @@ export interface User {
   blocked_user_ids: string[];
   language: 'ru' | 'be' | 'en';
   settings: UserSettings;
+  auth_name: string | null;
 }
 
 export interface UserSettings {
@@ -54,4 +55,5 @@ export interface UserLocation {
   denomination: string | null;
   statuses: string[];
   is_online: boolean;
+  auth_name: string | null;
 }

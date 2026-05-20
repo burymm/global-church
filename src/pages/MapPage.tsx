@@ -150,22 +150,24 @@ function churchIcon(count: number) {
 function GroupPopupContent({ members, currentUserStatuses, currentUserId }: { members: UserLocation[]; currentUserStatuses: string[]; currentUserId?: string }) {
   const navigate = useNavigate();
   return (
-    <div className="min-w-[160px]">
+    <div className="min-w-[200px]">
       {members.map((m) => {
         const canChat = m.user_id !== currentUserId && m.statuses?.includes('readyToChat') && currentUserStatuses.includes('readyToChat');
         return (
           <button key={m.user_id} onClick={() => { if (canChat) navigate(`/chat/${m.user_id}`); }}
-            className={`w-full flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded text-left ${canChat ? 'cursor-pointer' : 'cursor-default'}`}>
-            <span className="text-lg">{m.display_icon || '✝'}</span>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium truncate">{m.display_name}</p>
-              {m.statuses?.length > 0 && (
-                <p className="text-xs text-blue-600 truncate">
-                  {m.statuses.map((s: string) => `${statusIcons[s] || ''} ${i18n.t(`profile.statusesList.${s}`)}`).join(' · ')}
+            className={`w-full flex flex-col justify-center items-start gap-2 p-0 mb-2 hover:bg-gray-50 rounded text-left ${canChat ? 'cursor-pointer' : 'cursor-default'}`}>
+            <div className="flex items-center w-full">
+              <span className="text-lg mr-2">{ m.display_icon || '✝' }</span>
+              <p className="text-sm font-medium truncate !my-0">{ m.display_name || m.auth_name || 'User' }</p>
+              <span className="ml-auto mr-2">{canChat && <span className="text-lg">💬</span>}</span>
+            </div>
+            <div className="min-w-0 flex-1 ml-3">
+              { m.statuses?.length > 0 && (
+                <p className="text-xs text-blue-600 !my-0 ml-2">
+                  {m.statuses.map((s: string) => statusIcons[s] || '').join(' ')}
                 </p>
               )}
             </div>
-            {canChat && <span className="text-lg">💬</span>}
           </button>
         );
       })}
@@ -178,22 +180,28 @@ function PopupContent({ loc, currentUserStatuses, currentUserId }: { loc: UserLo
   const canChat = loc.user_id !== currentUserId && loc.statuses?.includes('readyToChat') && currentUserStatuses.includes('readyToChat');
   const handleChat = () => navigate(`/chat/${loc.user_id}`);
   return (
-    <div className="text-center min-w-[140px]">
-      {loc.avatar_url && (
-        <img src={loc.avatar_url} alt="" className="w-10 h-10 rounded-full mx-auto mb-1" />
-      )}
-      <p className="font-medium text-sm">{loc.display_name}</p>
-      {loc.denomination && (
-        <p className="text-xs text-gray-500">{i18n.t(`profile.denominations.${loc.denomination}`)}</p>
-      )}
-      {loc.statuses?.length > 0 && (
-        <p className="text-xs text-blue-600 mt-0.5">
-          {loc.statuses.map((s: string) => `${statusIcons[s] || ''} ${i18n.t(`profile.statusesList.${s}`)}`).join(' · ')}
-        </p>
-      )}
+    <div className="min-w-[200px]">
+      <div className="flex gap-2 flex-col items-start">
+        <div className="flex items-center w-full mr-2">
+          { loc.avatar_url && (
+              <img src={ loc.avatar_url } alt="" className="w-10 h-10 rounded-full shrink-0"/>
+          ) }
+          <p className="font-medium text-sm mt-0">{ loc.display_name || loc.auth_name || 'User' }</p>
+        </div>
+        <div className="w-full ml-3">
+          { loc.denomination && (
+              <p className="text-xs !my-0 text-gray-500">{i18n.t(`profile.denominations.${loc.denomination}`)}</p>
+          )}
+          {loc.statuses?.length > 0 && (
+            <p className="text-xs text-blue-600 !my-0">
+              {loc.statuses.map((s: string) => statusIcons[s] || '').join(' ')}
+            </p>
+          )}
+        </div>
+      </div>
       {canChat && (
         <button onClick={handleChat}
-          className="mt-2 bg-blue-600 text-white rounded-full px-4 py-1.5 text-sm font-medium">
+          className="mt-3 bg-blue-600 text-white rounded-full px-4 py-1.5 text-sm font-medium w-full">
           💬 {i18n.t('chat.chatLabel')}
         </button>
       )}

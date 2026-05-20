@@ -25,6 +25,7 @@
 
 ### Фаза 2 — Улучшение UX
 - [ ] Online/offline status
+- [ ] [task-05](tasks/task-05-map-popup-name-fallback-icons.md) — Map popup: fallback name + statuses as icons only
 - [ ] Marker clustering (prototype done, needs polish)
 - [ ] Smooth marker animation
 - [ ] Map filters (pray together, home group seekers)

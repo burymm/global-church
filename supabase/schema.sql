@@ -22,7 +22,8 @@ CREATE TABLE users (
   last_seen_at TIMESTAMPTZ DEFAULT NOW(),
   blocked_user_ids TEXT[] DEFAULT '{}',
   language TEXT DEFAULT 'ru' CHECK (language IN ('ru', 'be', 'en')),
-  settings JSONB DEFAULT '{}'
+  settings JSONB DEFAULT '{}',
+  auth_name TEXT
 );
 
 CREATE INDEX idx_users_location ON users(location_lat, location_lng)
@@ -90,11 +91,12 @@ CREATE TRIGGER users_updated_at
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO users (id, display_name, avatar_url)
+  INSERT INTO users (id, display_name, avatar_url, auth_name)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email),
-    NEW.raw_user_meta_data->>'avatar_url'
+    NEW.raw_user_meta_data->>'avatar_url',
+    COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email)
   );
   RETURN NEW;
 END;
