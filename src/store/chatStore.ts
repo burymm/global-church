@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import type { Message } from '../types';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import { useAuthStore } from './authStore';
+import { playMessageSound, showNotification } from '../utils/notification';
 
 interface Conversation {
   id: string;
@@ -106,6 +108,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
               unreadDelta,
             ),
           }));
+
+          if (msg.recipient_id === userId) {
+            const settings = useAuthStore.getState().user?.settings;
+            if (document.hidden && settings?.notifications_enabled !== false) {
+              const senderName = get().conversations.find((c) => c.other_user_id === msg.sender_id)?.other_user.display_name || 'New message';
+              showNotification(senderName, msg.content);
+            } else if (!document.hidden && settings?.sound_enabled !== false) {
+              playMessageSound();
+            }
+          }
         })
       .subscribe();
     set({ _globalChannel: channel });

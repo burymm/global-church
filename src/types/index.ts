@@ -17,7 +17,18 @@ export interface User {
   last_seen_at: string;
   blocked_user_ids: string[];
   language: 'ru' | 'be' | 'en';
+  settings: UserSettings;
 }
+
+export interface UserSettings {
+  notifications_enabled: boolean;
+  sound_enabled: boolean;
+}
+
+export const defaultSettings: UserSettings = {
+  notifications_enabled: true,
+  sound_enabled: true,
+};
 
 export interface Message {
   id: string;

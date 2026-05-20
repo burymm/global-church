@@ -15,9 +15,11 @@ export function ProfilePopup() {
   const [selectedInterests, setSelectedInterests] = useState<string[]>(user?.interests || []);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>(user?.statuses || []);
   const [language, setLanguage] = useState(user?.language || 'ru');
+  const [notificationsEnabled, setNotificationsEnabled] = useState(user?.settings?.notifications_enabled ?? true);
+  const [soundEnabled, setSoundEnabled] = useState(user?.settings?.sound_enabled ?? true);
 
   const handleSave = async () => {
-    await updateUser({ display_name: displayName, display_icon: selectedEmoji, denomination, interests: selectedInterests, statuses: selectedStatuses, language });
+    await updateUser({ display_name: displayName, display_icon: selectedEmoji, denomination, interests: selectedInterests, statuses: selectedStatuses, language, settings: { notifications_enabled: notificationsEnabled, sound_enabled: soundEnabled } });
     i18n.changeLanguage(language);
     close();
   };
@@ -93,6 +95,32 @@ export function ProfilePopup() {
                   <button key={item.value} onClick={() => toggle(selectedStatuses, item.value, setSelectedStatuses)}
                     className={`px-3 py-1.5 rounded-lg text-sm ${selectedStatuses.includes(item.value) ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700'}`}>{statusIcons[item.value]} {t(item.labelKey)}</button>
                 ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('profile.notifications')}</label>
+              <div className="flex gap-4">
+                <button onClick={() => setNotificationsEnabled(true)}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium ${notificationsEnabled ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                  {t('common.on')}
+                </button>
+                <button onClick={() => setNotificationsEnabled(false)}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium ${!notificationsEnabled ? 'bg-gray-300 text-gray-700' : 'bg-gray-100 text-gray-500'}`}>
+                  {t('common.off')}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('profile.sound')}</label>
+              <div className="flex gap-4">
+                <button onClick={() => setSoundEnabled(true)}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium ${soundEnabled ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                  {t('common.on')}
+                </button>
+                <button onClick={() => setSoundEnabled(false)}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium ${!soundEnabled ? 'bg-gray-300 text-gray-700' : 'bg-gray-100 text-gray-500'}`}>
+                  {t('common.off')}
+                </button>
               </div>
             </div>
           </div>
