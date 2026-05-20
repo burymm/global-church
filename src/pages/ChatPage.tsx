@@ -35,22 +35,26 @@ export function ChatPage() {
     }
 
     const checkAccess = async () => {
-      const { data: targetUser } = await supabase
-        .from('users')
-        .select('statuses')
-        .eq('id', userId)
-        .maybeSingle();
-      if (!targetUser) {
+      try {
+        const { data: targetUser } = await supabase
+          .from('users')
+          .select('statuses')
+          .eq('id', userId)
+          .maybeSingle();
+        if (!targetUser) {
+          setGuard('noUser');
+          return;
+        }
+        const myStatuses = currentUser?.statuses || [];
+        const hasAccess = myStatuses.includes('readyToChat') && targetUser.statuses?.includes('readyToChat');
+        if (hasAccess) {
+          setGuard('allowed');
+          setActiveUser(userId);
+        } else {
+          setGuard('noAccess');
+        }
+      } catch {
         setGuard('noUser');
-        return;
-      }
-      const myStatuses = currentUser?.statuses || [];
-      const hasAccess = myStatuses.includes('readyToChat') && targetUser.statuses?.includes('readyToChat');
-      if (hasAccess) {
-        setGuard('allowed');
-        setActiveUser(userId);
-      } else {
-        setGuard('noAccess');
       }
     };
     checkAccess();
@@ -80,9 +84,12 @@ export function ChatPage() {
     if (!userId) { setUserName(null); return; }
     const conv = conversations.find((c) => c.other_user_id === userId);
     if (conv) { setUserName(conv.other_user.display_name); return; }
-    supabase.from('users').select('display_name').eq('id', userId).maybeSingle().then(({ data }) => {
-      if (data) setUserName(data.display_name);
-    });
+    (async () => {
+      try {
+        const { data } = await supabase.from('users').select('display_name').eq('id', userId).maybeSingle();
+        if (data) setUserName(data.display_name);
+      } catch {}
+    })();
   }, [userId, conversations]);
 
   if (userId && guard === 'noUser') {

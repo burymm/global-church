@@ -68,7 +68,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   updateUser: async (updates: Partial<User>) => {
     const session = get().session;
     if (!session) return;
-    await supabase.from('users').update(updates).eq('id', session.user.id);
+    try {
+      await supabase.from('users').update(updates).eq('id', session.user.id);
+    } catch {}
     const currentUser = get().user;
     set({ user: currentUser ? { ...currentUser, ...updates } : null });
   },

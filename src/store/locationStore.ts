@@ -24,30 +24,34 @@ export const useLocationStore = create<LocationState>((set, get) => ({
   isUpdating: false,
 
   fetchOnlineLocations: async () => {
-    const { data: me } = await supabase
-      .from('users')
-      .select('blocked_user_ids')
-      .eq('id', (await supabase.auth.getSession()).data.session?.user.id)
-      .maybeSingle();
+    try {
+      const { data: me } = await supabase
+        .from('users')
+        .select('blocked_user_ids')
+        .eq('id', (await supabase.auth.getSession()).data.session?.user.id)
+        .maybeSingle();
 
-    const blocked = (me?.blocked_user_ids as string[]) || [];
+      const blocked = (me?.blocked_user_ids as string[]) || [];
 
-    const { data } = await supabase
-      .from('users')
-      .select('id, display_name, display_icon, avatar_url, denomination, statuses, location_lat, location_lng, is_sharing_location, updated_at, is_online')
-      .eq('is_sharing_location', true)
-      .not('location_lat', 'is', null);
+      const { data } = await supabase
+        .from('users')
+        .select('id, display_name, display_icon, avatar_url, denomination, statuses, location_lat, location_lng, is_sharing_location, updated_at, is_online')
+        .eq('is_sharing_location', true)
+        .not('location_lat', 'is', null);
 
-    const locations: UserLocation[] = (data || [])
-      .filter((u) => !blocked.includes(u.id))
-      .map((u) => ({
-        id: u.id, user_id: u.id, lat: u.location_lat, lng: u.location_lng,
-        accuracy: null, updated_at: u.updated_at, is_sharing: true,
-        display_name: u.display_name, display_icon: u.display_icon, avatar_url: u.avatar_url,
-        denomination: u.denomination, statuses: u.statuses || [],
-        is_online: u.is_online,
-      }));
-    set({ userLocations: locations });
+      const locations: UserLocation[] = (data || [])
+        .filter((u) => !blocked.includes(u.id))
+        .map((u) => ({
+          id: u.id, user_id: u.id, lat: u.location_lat, lng: u.location_lng,
+          accuracy: null, updated_at: u.updated_at, is_sharing: true,
+          display_name: u.display_name, display_icon: u.display_icon, avatar_url: u.avatar_url,
+          denomination: u.denomination, statuses: u.statuses || [],
+          is_online: u.is_online,
+        }));
+      set({ userLocations: locations });
+    } catch {
+      set({ userLocations: [] });
+    }
   },
 
   startHeartbeat: () => {

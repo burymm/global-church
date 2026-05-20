@@ -9,6 +9,7 @@ import { AuthCallbackPage } from './pages/AuthCallbackPage';
 import { BottomNav } from './components/ui/BottomNav';
 import { PwaInstallPrompt } from './components/PwaInstallPrompt';
 import { ProfilePopup } from './components/ProfilePopup';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 export default function App() {
   const { session, isLoading, init } = useAuthStore();
@@ -23,6 +24,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <ErrorBoundary>
       <div className="flex flex-col h-full">
         <div className="flex-1 overflow-hidden pb-20">
           <Routes>
@@ -48,6 +50,7 @@ export default function App() {
         <PwaInstallPrompt />
         {session && <ProfilePopup />}
       </div>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }

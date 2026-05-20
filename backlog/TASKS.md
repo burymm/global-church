@@ -34,6 +34,8 @@
 - [ ] Empty state screen
 - [ ] Performance optimizations
 - [ ] Offline fallback
+- [ ] Release notes & app version screen
+- [ ] Unread message count & badge on conversations
 
 ### Фаза 3 — Масштабирование
 - [ ] Manual city selection (no GPS)
