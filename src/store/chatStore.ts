@@ -82,12 +82,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
   init: async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
-    const { _globalChannel } = get();
-    if (_globalChannel) return;
     set({ _sessionUserId: session.user.id });
     await get().fetchConversations();
 
-    const channel = supabase.channel('conversations-global')
+    if (get()._globalChannel) return;
+
+    const channel = supabase.channel(`conversations-global-${Date.now()}`)
       .on('postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages' },
         (payload) => {
@@ -123,6 +123,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         })
       .subscribe();
     set({ _globalChannel: channel });
+    console.log('[chatStore] global channel subscribed');
   },
 
   destroy: async () => {

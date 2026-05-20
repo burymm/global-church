@@ -1,5 +1,4 @@
 import { useEffect, useCallback, useRef, useMemo } from 'react';
-import { createRoot } from 'react-dom/client';
 import { useNavigate } from 'react-router-dom';
 import i18n, { statusIcons } from '../i18n';
 import { useLocationStore } from '../store/locationStore';
@@ -87,25 +86,6 @@ function LocateControl() {
     const container = L.DomUtil.create('div');
     container.className = 'flex flex-row gap-1';
 
-    const root = createRoot(container);
-
-    const render = () => {
-      root.render(
-        <>
-          <button onClick={handleLocate}
-            className="px-3 py-2 bg-white rounded-lg shadow-md border-none cursor-pointer text-xs whitespace-nowrap hover:bg-gray-50">
-            {isSharing ? i18n.t('map.stopSharing') : i18n.t('map.shareLocation')}
-          </button>
-          <button onClick={handleCenter} title={i18n.t('map.centerOnMe')}
-            className="px-3 py-2 bg-white rounded-lg shadow-md border-none cursor-pointer text-sm hover:bg-gray-50">
-            📍
-          </button>
-        </>
-      );
-    };
-
-    render();
-
     const Ctrl = L.Control.extend({
       options: { position: 'topleft' },
       onAdd: () => container,
@@ -113,10 +93,24 @@ function LocateControl() {
     const ctrl = new Ctrl();
     map.addControl(ctrl);
 
+    const render = () => {
+      container.innerHTML = `
+        <button class="locate-btn px-3 py-2 bg-white rounded-lg shadow-md border-none cursor-pointer text-xs whitespace-nowrap hover:bg-gray-50">
+          ${isSharing ? i18n.t('map.stopSharing') : i18n.t('map.shareLocation')}
+        </button>
+        <button class="center-btn px-3 py-2 bg-white rounded-lg shadow-md border-none cursor-pointer text-sm hover:bg-gray-50" title="${i18n.t('map.centerOnMe')}">
+          📍
+        </button>
+      `;
+      container.querySelector('.locate-btn')!.addEventListener('click', handleLocate);
+      container.querySelector('.center-btn')!.addEventListener('click', handleCenter);
+    };
+
+    render();
     i18n.on('languageChanged', render);
+
     return () => {
       map.removeControl(ctrl);
-      root.unmount();
       i18n.off('languageChanged', render);
     };
   }, [map, isSharing, handleLocate, handleCenter]);

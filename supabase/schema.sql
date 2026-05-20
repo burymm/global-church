@@ -21,7 +21,8 @@ CREATE TABLE users (
   is_online BOOLEAN DEFAULT FALSE,
   last_seen_at TIMESTAMPTZ DEFAULT NOW(),
   blocked_user_ids TEXT[] DEFAULT '{}',
-  language TEXT DEFAULT 'ru' CHECK (language IN ('ru', 'be', 'en'))
+  language TEXT DEFAULT 'ru' CHECK (language IN ('ru', 'be', 'en')),
+  settings JSONB DEFAULT '{}'
 );
 
 CREATE INDEX idx_users_location ON users(location_lat, location_lng)

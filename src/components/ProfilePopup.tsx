@@ -100,7 +100,7 @@ export function ProfilePopup() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">{t('profile.notifications')}</label>
               <div className="flex gap-4">
-                <button onClick={() => setNotificationsEnabled(true)}
+                <button onClick={() => { setNotificationsEnabled(true); Notification.requestPermission(); }}
                   className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium ${notificationsEnabled ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>
                   {t('common.on')}
                 </button>

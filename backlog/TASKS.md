@@ -35,9 +35,10 @@
 - [ ] Performance optimizations
 - [ ] Offline fallback
 - [ ] Release notes & app version screen
-- [ ] [task-03](tasks/task-03-notifications.md) — Sound & browser notifications for new messages
+- [x] [task-03](tasks/task-03-notifications.md) — Sound & browser notifications for new messages
 
 ### Фаза 3 — Масштабирование
+- [ ] [task-04](tasks/task-04-web-push-notifications.md) — Web Push уведомления (iOS 16.4+ / Android)
 - [ ] Manual city selection (no GPS)
 - [ ] Group chats
 - [ ] Announcements

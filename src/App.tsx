@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from './store/authStore';
 import { useChatStore } from './store/chatStore';
+import { unlockAudio } from './utils/notification';
 import { MapPage } from './pages/MapPage';
 import { ChatPage } from './pages/ChatPage';
 import { AuthPage } from './pages/AuthPage';
@@ -30,6 +31,12 @@ export default function App() {
       chatDestroy();
     }
   }, [session, chatInit, chatDestroy]);
+
+  useEffect(() => {
+    const unlock = () => unlockAudio();
+    document.addEventListener('click', unlock, { once: true });
+    document.addEventListener('touchstart', unlock, { once: true });
+  }, []);
 
   if (isLoading) return <div className="flex items-center justify-center h-full">{t('common.loading')}</div>;
 
