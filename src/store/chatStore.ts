@@ -93,7 +93,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
           if (msg.sender_id !== userId && msg.recipient_id !== userId) return;
 
           const otherUserId = msg.sender_id === userId ? msg.recipient_id : msg.sender_id;
-          const unreadDelta = msg.recipient_id === userId ? 1 : 0;
+          const isActive = get().activeUserId === otherUserId;
+          const unreadDelta = msg.recipient_id === userId && !isActive ? 1 : 0;
 
           set((state) => ({
             conversations: upsertConversation(
@@ -129,13 +130,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         .order('created_at', { ascending: true })
         .limit(100);
       const parsed = ((data as any[]) || []).map(parseMessage);
-      const unreadCount = parsed.filter((m) => m.recipient_id === session.user.id && !m.is_read).length;
       set({ messages: parsed, isLoading: false });
-      set((state) => ({
-        conversations: state.conversations.map((c) =>
-          c.other_user_id === userId ? { ...c, unread_count: unreadCount } : c
-        ),
-      }));
     } catch {
       set({ messages: [], isLoading: false });
     }
